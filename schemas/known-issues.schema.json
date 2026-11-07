@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "known-issues.schema.json",
+  "title": "data/known-issues.json, a game's known issues (docs/SPEC.md section 7)",
+  "type": "array",
+  "items": { "$ref": "common.defs.json#/$defs/knownIssue" }
+}

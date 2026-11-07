@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "manifest.schema.json",
+  "title": "dvr-package.json, the manifest in a package zip (docs/SPEC.md section 3)",
+  "type": "object",
+  "required": ["format", "id", "version", "maturity", "date", "appid", "minAppVersion", "loader", "source", "files"],
+  "properties": {
+    "format": { "const": 1 },
+    "id": { "$ref": "common.defs.json#/$defs/id" },
+    "version": { "$ref": "common.defs.json#/$defs/version" },
+    "maturity": { "$ref": "common.defs.json#/$defs/maturity" },
+    "date": { "$ref": "common.defs.json#/$defs/date" },
+    "coreVersion": { "$ref": "common.defs.json#/$defs/version" },
+    "appid": { "$ref": "common.defs.json#/$defs/appid" },
+    "minAppVersion": { "$ref": "common.defs.json#/$defs/version" },
+    "loader": { "$ref": "common.defs.json#/$defs/loader" },
+    "testedBuildIds": { "$ref": "common.defs.json#/$defs/buildIds" },
+    "notes": { "$ref": "common.defs.json#/$defs/text" },
+    "source": { "$ref": "common.defs.json#/$defs/source" },
+    "files": {
+      "type": "object",
+      "description": "Every file in the zip except dvr-package.json and dvr-package.sig, forward-slash paths. The path rules themselves (section 3) are the reader's job.",
+      "propertyNames": { "type": "string", "minLength": 1, "not": { "enum": ["dvr-package.json", "dvr-package.sig"] } },
+      "additionalProperties": { "$ref": "common.defs.json#/$defs/sha256" }
+    }
+  }
+}

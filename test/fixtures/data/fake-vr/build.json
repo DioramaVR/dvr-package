@@ -1,0 +1,5 @@
+{
+  "loader": { "type": "bepinex6-il2cpp", "version": "6.0.0-be.791" },
+  "payload": "payload",
+  "plugin": { "folder": "BepInEx/plugins/FakeVr", "config": "BepInEx/config/dvr.fake.cfg" }
+}
