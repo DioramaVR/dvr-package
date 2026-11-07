@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "credits.schema.json",
+  "title": "credits.json, the project's credits (docs/SPEC.md section 7)",
+  "type": "object",
+  "required": ["format", "credits"],
+  "properties": {
+    "format": { "const": 1 },
+    "title": { "$ref": "common.defs.json#/$defs/text" },
+    "intro": { "$ref": "common.defs.json#/$defs/text" },
+    "credits": { "allOf": [{ "$ref": "common.defs.json#/$defs/credits" }, { "minItems": 1 }] },
+    "notices": { "$ref": "common.defs.json#/$defs/text" },
+    "disclaimer": { "$ref": "common.defs.json#/$defs/text" }
+  }
+}

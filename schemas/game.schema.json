@@ -98,27 +98,7 @@
       "required": ["developer", "publisher"],
       "properties": { "developer": { "$ref": "common.defs.json#/$defs/text" }, "publisher": { "$ref": "common.defs.json#/$defs/text" } }
     },
-    "credits": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["name", "license"],
-        "properties": {
-          "name": { "$ref": "common.defs.json#/$defs/text" },
-          "for": { "$ref": "common.defs.json#/$defs/text" },
-          "license": { "$ref": "common.defs.json#/$defs/text" },
-          "url": { "$ref": "common.defs.json#/$defs/url" },
-          "support": {
-            "type": "array",
-            "items": {
-              "type": "object", "required": ["label", "url"],
-              "properties": { "label": { "$ref": "common.defs.json#/$defs/text" }, "url": { "$ref": "common.defs.json#/$defs/url" } }
-            }
-          },
-          "highlight": { "type": "boolean" }
-        }
-      }
-    },
+    "credits": { "$ref": "common.defs.json#/$defs/credits" },
     "media": {
       "type": "array",
       "items": {

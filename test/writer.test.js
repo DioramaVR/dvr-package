@@ -258,3 +258,16 @@ test('the public index: exports load lazily; w2 parts may be missing on this bra
   assert.strictEqual(api.PackageError, require('../lib/errors').PackageError);
   assert.deepStrictEqual(Object.keys(api).sort(), ['FORMAT', 'PackageError', 'errors', 'index', 'licenses', 'modJson', 'privacy', 'reader', 'registry', 'schemas', 'sign', 'version', 'writer', 'zip']);
 });
+
+test('credits: a copy of credits.json at the zip root, hashed and signed; a bad one is refused', () => {
+  const dir = f.makeMod(path.join(tmp, 'src-credits'));
+  const credits = path.join(tmp, 'credits.json');
+  fs.writeFileSync(credits, JSON.stringify({ format: 1, title: 'Credits', credits: [{ name: 'Some Library', license: 'MIT', url: 'https://example.org/' }] }, null, 2) + '\n');
+  const { zip, manifest } = packRelease(dir, 'credits', { credits });
+  assert.ok(manifest.files['credits.json'], 'listed in files');
+  const inZip = f.readZip(zip).get('credits.json');
+  assert.deepStrictEqual(inZip, fs.readFileSync(credits), 'byte for byte');
+  const bad = path.join(tmp, 'bad-credits.json');
+  fs.writeFileSync(bad, JSON.stringify({ format: 1, credits: [{ name: 'x' }] }) + '\n');
+  assert.throws(() => packRelease(dir, 'credits-bad', { credits: bad }), (e) => e.code === 'format' && /credits.json/.test(e.message));
+});

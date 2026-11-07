@@ -70,6 +70,7 @@ dvr-package.sig    its signature (section 4)
 mod.json           how the installer installs the mod
 payload/           the files that go into the game folder, laid out as there
 <other files>      anything mod.json names (e.g. a video), inside the zip
+credits.json       optional: the project's credits (section 7), as published
 ```
 
 ### The manifest, `dvr-package.json`
@@ -329,6 +330,35 @@ the game's build configuration, into the zip's `mod.json` and the index.
 `[{ "id", "title", "text", "severity", "since"?, "fixedIn"? }]`, the same shape
 as an index's `knownIssues` (section 5). A writer copies it into the index
 before signing.
+
+### `credits.json`
+
+The project's credits: one file, published once, shown by the website and the
+installer, and copied into each zip (section 3) byte for byte.
+
+```json
+{
+  "format": 1,
+  "title": "Credits",
+  "intro": "Plain text.",
+  "credits": [
+    { "name": "Some Library", "for": "What it does here", "license": "MIT", "url": "https://example.org/",
+      "support": [ { "label": "Sponsor", "url": "https://example.org/sponsor" } ], "highlight": true },
+    { "name": "A Font", "for": "Headings", "license": "OFL-1.1", "url": "https://example.org/font",
+      "notice": "fonts/OFL-Font.txt" }
+  ],
+  "notices": "Plain text.",
+  "disclaimer": "Plain text."
+}
+```
+
+- `credits` lists at least one entry, in display order. Each has `name` and
+  `license`; `for`, `url`, `support` (links to support that project, taken only
+  from the project's own pages), `highlight` (show it prominently) and `notice`
+  (where its full licence notice is, in what ships) are optional.
+- `title`, `intro`, `notices` and `disclaimer` are optional plain text.
+- A game's own `game.json` `credits` uses the same entry shape, for parts
+  specific to that game.
 
 ## 8. Reader behaviour
 

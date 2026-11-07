@@ -14,7 +14,7 @@ const SHA = 'a'.repeat(64);
 const source = { commit: 'a1b2c3d', coreRepo: 'example/core', coreCommit: 'e4f5a6b', coreFrom: 'tag v0.1.1', actionsCommit: 'c7d8e9f', builtAt: '2026-11-20T10:00:00Z' };
 
 test('every schema loads and uses only keywords the validator supports', () => {
-  assert.deepStrictEqual(s.names(), ['game', 'index', 'known-issues', 'manifest', 'registry', 'release-entry']);
+  assert.deepStrictEqual(s.names(), ['credits', 'game', 'index', 'known-issues', 'manifest', 'registry', 'release-entry']);
   for (const n of s.names()) assert.doesNotThrow(() => s.load(n), n);
   for (const f of fs.readdirSync(path.join(__dirname, '..', 'schemas'))) {
     const text = fs.readFileSync(path.join(__dirname, '..', 'schemas', f), 'utf8');
@@ -158,4 +158,21 @@ test('registry', () => {
   for (const v of ['<0.3.0', '<=1', '>2.0', '>=0.2.0', '=0.2.0']) {
     assert.deepStrictEqual(s.validate({ ...reg, announcements: [{ id: 'a', from: '2026-12-01', until: '2026-12-02', title: 'T', text: 'T', appVersions: v }] }, 'registry'), [], v);
   }
+});
+
+test('credits.json: the project credits', () => {
+  const good = {
+    format: 1, title: 'Credits', intro: 'Plain text.',
+    credits: [
+      { name: 'Some Library', for: 'What it does', license: 'MIT', url: 'https://example.org/', highlight: true,
+        support: [{ label: 'Sponsor', url: 'https://example.org/sponsor' }] },
+      { name: 'A Font', license: 'OFL-1.1', notice: 'fonts/OFL.txt' },
+    ],
+    notices: 'Plain text.', disclaimer: 'Plain text.',
+  };
+  assert.deepStrictEqual(s.validate(good, 'credits'), []);
+  assert.ok(s.validate({ ...good, credits: [] }, 'credits').length, 'at least one credit');
+  assert.ok(s.validate({ ...good, credits: [{ name: 'x' }] }, 'credits').some((p) => /license/.test(p.message)));
+  assert.ok(s.validate({ ...good, credits: [{ name: 'x', license: 'MIT', url: 'http://example.org/' }] }, 'credits').length, 'https only');
+  assert.ok(s.validate({ ...good, format: 2 }, 'credits').length);
 });
