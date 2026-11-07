@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "registry.schema.json",
+  "title": "registry.json, every game and installer version (docs/SPEC.md section 6)",
+  "type": "object",
+  "required": ["format", "games"],
+  "properties": {
+    "format": { "const": 1 },
+    "app": {
+      "type": "object",
+      "properties": {
+        "latest": { "$ref": "common.defs.json#/$defs/version" },
+        "url": { "$ref": "common.defs.json#/$defs/url" },
+        "releases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["version", "date", "url", "size", "sha256"],
+            "properties": {
+              "version": { "$ref": "common.defs.json#/$defs/version" },
+              "date": { "$ref": "common.defs.json#/$defs/date" },
+              "url": { "$ref": "common.defs.json#/$defs/url" },
+              "size": { "type": "integer", "minimum": 1 },
+              "sha256": { "$ref": "common.defs.json#/$defs/sha256" }
+            }
+          }
+        }
+      }
+    },
+    "announcements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "from", "until", "title", "text"],
+        "properties": {
+          "id": { "$ref": "common.defs.json#/$defs/id" },
+          "from": { "$ref": "common.defs.json#/$defs/date" },
+          "until": { "$ref": "common.defs.json#/$defs/date" },
+          "title": { "$ref": "common.defs.json#/$defs/text" },
+          "text": { "$ref": "common.defs.json#/$defs/text" },
+          "link": { "$ref": "common.defs.json#/$defs/url" },
+          "appVersions": { "type": "string", "pattern": "^(<=|>=|<|>|=)[0-9]+(\\.[0-9]+)*$" }
+        }
+      }
+    },
+    "movedTo": { "anyOf": [{ "$ref": "common.defs.json#/$defs/url" }, { "type": "null" }] },
+    "waves": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "status"],
+        "properties": {
+          "id": { "$ref": "common.defs.json#/$defs/id" },
+          "name": { "$ref": "common.defs.json#/$defs/text" },
+          "status": { "$ref": "common.defs.json#/$defs/status" }
+        }
+      }
+    },
+    "games": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "game", "appid", "status"],
+        "properties": {
+          "id": { "$ref": "common.defs.json#/$defs/id" },
+          "name": { "$ref": "common.defs.json#/$defs/text" },
+          "game": { "$ref": "common.defs.json#/$defs/text" },
+          "appid": { "$ref": "common.defs.json#/$defs/appid" },
+          "status": { "$ref": "common.defs.json#/$defs/status" },
+          "wave": { "$ref": "common.defs.json#/$defs/id" },
+          "index": { "$ref": "common.defs.json#/$defs/url" },
+          "closedBeta": { "const": true }
+        },
+        "if": { "properties": { "status": { "const": "coming" } } },
+        "then": { "not": { "required": ["index"] } },
+        "else": { "required": ["index"] }
+      }
+    }
+  }
+}

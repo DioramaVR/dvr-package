@@ -1,0 +1,4 @@
+[
+  { "id": "pretend-bug", "title": "A pretend bug", "text": "It only exists in tests.", "severity": "minor", "since": "1.0.0" },
+  { "id": "fixed-bug", "title": "A fixed bug", "text": "Fixed in 1.1.0.", "severity": "annoying", "since": "1.0.0", "fixedIn": "1.1.0" }
+]

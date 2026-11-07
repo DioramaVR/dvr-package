@@ -1,0 +1,23 @@
+{
+  "format": 1,
+  "app": {
+    "latest": "0.2.0",
+    "url": "https://example.org/download/",
+    "releases": [
+      { "version": "0.2.0", "date": "2026-11-20", "url": "https://example.org/Setup-0.2.0.exe", "size": 81234567,
+        "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" }
+    ]
+  },
+  "announcements": [],
+  "movedTo": null,
+  "waves": [
+    { "id": "test", "name": "Test wave", "status": "stable" },
+    { "id": "1", "name": "Wave 1", "status": "coming" }
+  ],
+  "games": [
+    { "id": "fake-vr", "name": "Fake Game VR", "game": "Fake Game", "appid": 4242,
+      "status": "stable", "wave": "test", "index": "https://example.org/fake-vr/index.json" },
+    { "id": "other-vr", "name": "Other Game VR", "game": "Other Game", "appid": 4243,
+      "status": "coming", "closedBeta": true, "wave": "1", "siteNote": "an unknown field, kept as is" }
+  ]
+}
