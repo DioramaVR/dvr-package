@@ -12,7 +12,9 @@
     "dvr-pack": "bin/dvr-pack.js",
     "dvr-verify": "bin/dvr-verify.js",
     "dvr-sign": "bin/dvr-sign.js",
-    "dvr-licenses": "bin/dvr-licenses.js"
+    "dvr-licenses": "bin/dvr-licenses.js",
+    "dvr-index": "bin/dvr-index.js",
+    "dvr-registry": "bin/dvr-registry.js"
   },
   "files": [
     "lib",
