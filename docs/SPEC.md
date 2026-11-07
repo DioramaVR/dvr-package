@@ -108,6 +108,7 @@ payload/           the files that go into the game folder, laid out as there
 | `loader` | yes | `{type, version}`; `type` equals `mod.json`'s |
 | `testedBuildIds` | no | the game's Steam build ids this release was tested on |
 | `notes` | no | one line of plain text |
+| `knownIssues` | no | the game's known issues at build time, same shape as an index's (section 5). A zip loaded from a file has no index, so a reader shows these; for a listed release, the index's list is newer and wins |
 | `source` | yes | the receipt: mod `commit`; for a mod using the core, `coreRepo` (the repository the core was taken from, `owner/name`), `coreCommit` (a commit of that repository) and `coreFrom` (`tag v<coreVersion>` for a release); `actionsCommit` (the release tooling); `builtAt`. Builds of different maturities may take the core from different repositories that carry the same tags, so a release is identified by `coreRepo` plus the tag, not by the commit alone |
 | `files` | yes | every file in the zip except `dvr-package.json` and `dvr-package.sig`, forward-slash paths, each with its SHA-256 |
 
