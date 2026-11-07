@@ -20,6 +20,6 @@
         ]
       }
     },
-    "knownIssues": { "type": "array", "items": { "$ref": "common.defs.json#/$defs/knownIssue" } }
+    "knownIssues": { "$ref": "common.defs.json#/$defs/knownIssues" }
   }
 }

@@ -17,6 +17,7 @@
     "testedBuildIds": { "$ref": "common.defs.json#/$defs/buildIds" },
     "notes": { "$ref": "common.defs.json#/$defs/text" },
     "source": { "$ref": "common.defs.json#/$defs/source" },
+    "knownIssues": { "$ref": "common.defs.json#/$defs/knownIssues" },
     "files": {
       "type": "object",
       "description": "Every file in the zip except dvr-package.json and dvr-package.sig, forward-slash paths. The path rules themselves (section 3) are the reader's job.",

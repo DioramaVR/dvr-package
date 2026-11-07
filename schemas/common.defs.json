@@ -35,6 +35,7 @@
         "builtAt": { "$ref": "#/$defs/timestamp" }
       }
     },
+    "knownIssues": { "type": "array", "items": { "$ref": "#/$defs/knownIssue" }, "description": "A game's known issues (SPEC sections 3, 5, 7)." },
     "knownIssue": {
       "type": "object",
       "required": ["id", "title", "text", "severity"],

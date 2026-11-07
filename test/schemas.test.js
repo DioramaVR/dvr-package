@@ -122,6 +122,10 @@ test('manifest (dvr-package.json)', () => {
   delete noCore.coreVersion; delete noCore.source.coreRepo; delete noCore.source.coreCommit; delete noCore.source.coreFrom;
   assert.deepStrictEqual(s.validate(noCore, 'manifest'), [], 'a mod without the core');
   assert.ok(paths(s.validate({ ...manifest(), source: { ...source, coreRepo: 'no-slash' } }, 'manifest')).includes('/source/coreRepo'));
+  const issues = read('fake-vr/known-issues.json');
+  assert.deepStrictEqual(s.validate({ ...manifest(), knownIssues: issues }, 'manifest'), [], 'known issues at build time (SPEC 3)');
+  assert.deepStrictEqual(paths(s.validate({ ...manifest(), knownIssues: [{ ...issues[0], severity: 'fatal' }] }, 'manifest')), ['/knownIssues/0/severity']);
+  assert.deepStrictEqual(paths(s.validate({ ...manifest(), knownIssues: {} }, 'manifest')), ['/knownIssues']);
 });
 
 const entry = () => ({ version: '1.0.0', maturity: 'stable', date: '2026-11-20', coreVersion: '0.1.1', minAppVersion: '0.2.0', testedBuildIds: ['123456'], source: { ...source }, sha256: SHA, size: 31234567 });
