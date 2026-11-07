@@ -1,0 +1,13 @@
+{
+  "_about": "TEST ONLY. Throwaway Ed25519 key pairs for the tests and fixtures in this repository. They sign nothing real, are not in trusted-keys.json, and no installer trusts them. Never use them for anything else.",
+  "trusted": {
+    "id": "f3a2f60ea7bef8d0",
+    "spki": "MCowBQYDK2VwAyEAn7k9r1ePByLFMdrnPSwkprbL3ghdiGLMGF8Z4tazh4M=",
+    "pkcs8": "MC4CAQAwBQYDK2VwBCIEIAld78LsUC1XWQ3s2YcbB76oYsetMXZdVXiNImloq2gH"
+  },
+  "unknown": {
+    "id": "3ba9ae54eaa9ed5a",
+    "spki": "MCowBQYDK2VwAyEA72dJzu711KZBXyWSbsHSDcEDjnS324pqT1pWn97XYqs=",
+    "pkcs8": "MC4CAQAwBQYDK2VwBCIEIDEZJZvl57SOuXm4VlqGnkp9HUKBZQZ5jpWQSdpZYbeF"
+  }
+}
