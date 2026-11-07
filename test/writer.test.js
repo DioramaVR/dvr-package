@@ -48,6 +48,18 @@ test('a release pack: the manifest in section 3 order, signed, verifiable', () =
   assert.ok(!entries.has('payload.json') && !entries.has('build.json'));
 });
 
+test('knownIssues: after notes in the manifest, checked first; an empty list is left out', () => {
+  const dir = f.makeMod(path.join(tmp, 'ki'));
+  const { manifest } = packRelease(dir, 'ki', { notes: 'One line.', knownIssues: f.KNOWN_ISSUES });
+  const keys = Object.keys(manifest);
+  assert.strictEqual(keys.indexOf('knownIssues'), keys.indexOf('notes') + 1);
+  assert.strictEqual(keys[keys.indexOf('knownIssues') + 1], 'source');
+  assert.deepStrictEqual(manifest.knownIssues, f.KNOWN_ISSUES);
+  assert.ok(!('knownIssues' in packRelease(dir, 'ki-empty', { knownIssues: [] }).manifest));
+  assert.throws(() => packRelease(dir, 'ki-bad', { knownIssues: [{ id: 'x', title: 'T', text: 't', severity: 'bad' }] }), (e) => e.code === 'format' && /severity/.test(e.message));
+  assert.ok(!fs.existsSync(out('ki-bad')));
+});
+
 test('the same input gives the same zip; another date gives another', () => {
   const dir = f.makeMod(path.join(tmp, 'det'));
   const a = fs.readFileSync(packRelease(dir, 'det1').zip);
@@ -209,6 +221,15 @@ test('CLIs: dvr-pack --check, dvr-verify, dvr-sign, exit codes', () => {
   assert.match(rb.stderr, /^not-release-build: /);
   assert.strictEqual(run('dvr-pack', [dir]).status, 2);
   assert.strictEqual(run('dvr-pack', [dir, '--min-app-version', '0.2.0', '--channel', 'stable']).status, 2);
+  // --known-issues FILE.
+  const kiFile = path.join(tmp, 'known-issues.json');
+  fs.writeFileSync(kiFile, JSON.stringify(f.KNOWN_ISSUES, null, 2) + '\n');
+  const kiOut = path.join(tmp, 'cli-ki');
+  const rk = run('dvr-pack', [dir, '--out', kiOut, '--maturity', 'open-beta', '--version', '1.0.0', '--min-app-version', '0.2.0',
+    '--date', '2026-11-20', '--known-issues', kiFile, '--trusted-keys', trustedFile, '--check'], key);
+  assert.strictEqual(rk.status, 0, rk.stderr);
+  assert.deepStrictEqual(reader.checkZip(path.join(kiOut, 'fake-vr-1.0.0.zip'), f.READER_OPTS).knownIssues, f.KNOWN_ISSUES);
+  assert.strictEqual(run('dvr-pack', [dir, '--min-app-version', '0.2.0', '--known-issues', path.join(tmp, 'none.json')]).status, 2);
 
   const v = run('dvr-verify', [zipPath, '--trusted-keys', trustedFile, '--app-version', '1.0.0', '--json']);
   assert.deepStrictEqual(JSON.parse(v.stdout), { ok: true, id: 'fake-vr', version: '1.0.0', maturity: 'closed-beta', key: f.KEYS.trusted.id });

@@ -23,8 +23,26 @@ const verdict = (zipPath, opts = f.READER_OPTS) => {
 
 test('every fixture gets the verdict in expected.json', () => {
   const expected = JSON.parse(fs.readFileSync(path.join(FIX, 'expected.json'), 'utf8'));
-  assert.strictEqual(Object.keys(expected).length, 12);
+  assert.strictEqual(Object.keys(expected).length, 13);
   for (const [name, want] of Object.entries(expected)) assert.strictEqual(verdict(path.join(FIX, name)), want, name);
+});
+
+test('known issues: signed with the manifest and returned by the reader', () => {
+  const zipPath = path.join(FIX, 'good-known-issues.zip');
+  const r = reader.checkZip(zipPath, f.READER_OPTS);
+  assert.deepStrictEqual(r.knownIssues, f.KNOWN_ISSUES);
+  const root = path.join(tmp, 'ki');
+  assert.deepStrictEqual(reader.unpack(zipPath, root, f.READER_OPTS).knownIssues, f.KNOWN_ISSUES);
+  assert.deepStrictEqual(reader.list(root)[0].knownIssues, f.KNOWN_ISSUES);
+  // A zip without them reads as an empty list.
+  assert.deepStrictEqual(reader.checkZip(path.join(FIX, 'good-closed-beta.zip'), f.READER_OPTS).knownIssues, []);
+  // They're covered by the signature: changing one without re-signing is refused.
+  const changed = f.rewrap(zipPath, path.join(tmp, 'ki-changed.zip'), (e) => {
+    const m = JSON.parse(e.get('dvr-package.json').toString());
+    m.knownIssues[0].severity = 'minor';
+    e.set('dvr-package.json', Buffer.from(JSON.stringify(m, null, 2) + '\n'));
+  });
+  assert.strictEqual(verdict(changed), 'signature');
 });
 
 test('the committed fixtures are what make-fixtures.js makes', () => {
@@ -132,6 +150,11 @@ test('manifest refusals are format, with the reason', () => {
     [(m) => { m.files['payload/x'] = 'abc'; }, /SHA-256/],
     [(m) => { m.appid = 4243; }, /mod\.json says 4242/],
     [(m) => { m.loader.type = 'uevr'; }, /loader/],
+    [(m) => { m.knownIssues = {}; }, /knownIssues: not a list/],
+    [(m) => { m.knownIssues = [{ id: 'a', title: 'T', text: 'x', severity: 'fatal' }]; }, /severity/],
+    [(m) => { m.knownIssues = [{ id: 'a', title: 'T', text: 'x', severity: 'minor' }, { id: 'a', title: 'U', text: 'y', severity: 'minor' }]; }, /twice/],
+    [(m) => { m.knownIssues = [{ id: 'a', title: '', text: 'x', severity: 'minor' }]; }, /title/],
+    [(m) => { m.knownIssues = [{ id: 'a', title: 'T', text: 'x', severity: 'minor', fixedIn: '1.0.0-beta' }]; }, /fixedIn/],
   ];
   for (const [i, [change, re]] of cases.entries()) {
     const z = f.rewrap(good, path.join(tmp, `m${i}.zip`), (e) => f.editManifest(e, change));

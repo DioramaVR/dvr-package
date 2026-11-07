@@ -35,6 +35,12 @@ const RELEASE_INFO = {
   actionsCommit: 'c7d8e9f', release: true, loader: MOD_JSON.loader, builtAt: '2026-11-20T10:00:00Z',
 };
 
+// A game's known-issues.json (test data).
+const KNOWN_ISSUES = [
+  { id: 'pitch-reset', title: 'Pitch resets after loading a save', text: 'Click the right stick to set it again.', severity: 'annoying', since: '0.9.0', fixedIn: null },
+  { id: 'menu-flicker', title: 'The menu flickers on some headsets', text: 'Harmless.', severity: 'minor' },
+];
+
 // Release options for writer.pack.
 const RELEASE_OPTS = { maturity: 'closed-beta', version: '1.0.0', minAppVersion: '0.2.0', date: DATE, trustedKeys: TRUSTED };
 
@@ -95,6 +101,6 @@ function editManifest(entries, fn, which = 'trusted') {
 }
 
 module.exports = {
-  KEYS, TRUSTED, READER_OPTS, DATE, MOD_JSON, RELEASE_INFO, RELEASE_OPTS,
+  KEYS, TRUSTED, READER_OPTS, DATE, MOD_JSON, RELEASE_INFO, RELEASE_OPTS, KNOWN_ISSUES,
   write, makeMod, withKey, sigLine, readZip, writeZip, rewrap, editManifest,
 };

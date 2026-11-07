@@ -1,6 +1,7 @@
 {
   "good-closed-beta.zip": "ok",
   "good-stable.zip": "ok",
+  "good-known-issues.zip": "ok",
   "unsigned.zip": "unsigned",
   "bad-signature.zip": "signature",
   "unknown-key.zip": "untrusted-key",

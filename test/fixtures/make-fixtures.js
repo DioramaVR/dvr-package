@@ -32,6 +32,7 @@ function makeFixtures(out = __dirname) {
 
     save('good-closed-beta.zip', 'ok', (p) => fs.copyFileSync(good, p));
     save('good-stable.zip', 'ok', (p) => fs.copyFileSync(packed('st', { maturity: 'stable', notes: 'First stable release.' }), p));
+    save('good-known-issues.zip', 'ok', (p) => fs.copyFileSync(packed('ki', { knownIssues: f.KNOWN_ISSUES }), p));
     save('unsigned.zip', 'unsigned', (p) => f.rewrap(good, p, (e) => e.delete('dvr-package.sig')));
     save('bad-signature.zip', 'signature', (p) => f.rewrap(good, p, (e) => {
       // A real signature, but over different bytes.
