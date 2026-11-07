@@ -1,0 +1,15 @@
+{
+  "good-closed-beta.zip": "ok",
+  "good-stable.zip": "ok",
+  "good-known-issues.zip": "ok",
+  "unsigned.zip": "unsigned",
+  "bad-signature.zip": "signature",
+  "unknown-key.zip": "untrusted-key",
+  "bad-hash.zip": "hash",
+  "extra-file.zip": "extra-file",
+  "missing-file.zip": "missing-file",
+  "unsafe-path.zip": "unsafe-path",
+  "newer-format.zip": "format",
+  "needs-newer-app.zip": "app-version",
+  "not-a-mod.zip": "not-a-mod"
+}
