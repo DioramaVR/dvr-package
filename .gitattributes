@@ -1,0 +1,6 @@
+# Signed files are verified byte for byte: never convert line ends.
+* text=auto eol=lf
+*.zip binary
+*.sig -text
+*.json text eol=lf
+test/fixtures/** -text
