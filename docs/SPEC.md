@@ -88,7 +88,7 @@ payload/           the files that go into the game folder, laid out as there
   "testedBuildIds": ["123456"],
   "notes": "One line, optional.",
   "source": {
-    "commit": "a1b2c3d", "coreCommit": "e4f5a6b", "coreFrom": "tag v0.1.1",
+    "commit": "a1b2c3d", "coreRepo": "example/core", "coreCommit": "e4f5a6b", "coreFrom": "tag v0.1.1",
     "actionsCommit": "c7d8e9f", "builtAt": "2026-11-20T10:00:00Z"
   },
   "files": { "mod.json": "<SHA-256>", "payload/BepInEx/plugins/FakeVr/FakeVr.dll": "<SHA-256>" }
@@ -108,7 +108,7 @@ payload/           the files that go into the game folder, laid out as there
 | `loader` | yes | `{type, version}`; `type` equals `mod.json`'s |
 | `testedBuildIds` | no | the game's Steam build ids this release was tested on |
 | `notes` | no | one line of plain text |
-| `source` | yes | the receipt: mod `commit`, `coreCommit`, `coreFrom` (`tag v<coreVersion>` for a release), `actionsCommit` (the release tooling), `builtAt` |
+| `source` | yes | the receipt: mod `commit`; for a mod using the core, `coreRepo` (the repository the core was taken from, `owner/name`), `coreCommit` (a commit of that repository) and `coreFrom` (`tag v<coreVersion>` for a release); `actionsCommit` (the release tooling); `builtAt`. Builds of different maturities may take the core from different repositories that carry the same tags, so a release is identified by `coreRepo` plus the tag, not by the commit alone |
 | `files` | yes | every file in the zip except `dvr-package.json` and `dvr-package.sig`, forward-slash paths, each with its SHA-256 |
 
 ### Rules for the zip
@@ -171,7 +171,7 @@ One per game, served next to its signature.
       "url": "https://example.org/fake-vr-1.0.0.zip",
       "sha256": "<SHA-256 of the zip>",
       "size": 31234567,
-      "source": { "commit": "a1b2c3d", "coreCommit": "e4f5a6b", "coreFrom": "tag v0.1.1",
+      "source": { "commit": "a1b2c3d", "coreRepo": "example/core", "coreCommit": "e4f5a6b", "coreFrom": "tag v0.1.1",
                   "actionsCommit": "c7d8e9f", "builtAt": "2026-11-20T10:00:00Z" }
     }
   ],
