@@ -61,6 +61,18 @@ test('build.json holds only what the installer knows', () => {
   assert.ok(!('payload' in uevr));
 });
 
+test('the build recipe stays out of mod.json', () => {
+  const { game } = fresh();
+  const recipe = {
+    ...build(), project: 'src/Fake/Fake.csproj', archive: ['src'], stripTargets: ['Deploy'], pluginFiles: ['out/Fake.dll'],
+    _about: 'notes', loader: { ...build().loader, files: ['winhttp.dll'], from: 'somewhere' }, plugin: { ...build().plugin, extra: 1 },
+  };
+  const mod = mj.toModJson(game, recipe);
+  for (const k of ['project', 'archive', 'stripTargets', 'pluginFiles', '_about']) assert.ok(!(k in mod), `${k} left out`);
+  assert.deepStrictEqual(Object.keys(mod.loader).sort(), Object.keys(build().loader).sort());
+  assert.ok(!('extra' in mod.plugin));
+});
+
 test('no hover video, no video field', () => {
   const { game } = fresh();
   game.media = game.media.filter((m) => m.role !== 'hover');

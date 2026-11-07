@@ -127,6 +127,30 @@ payload/           the files that go into the game folder, laid out as there
 - Writers make zips **deterministic**: entries sorted by path and every
   timestamp set to the manifest `date`, so the same input gives the same zip.
 
+### `mod.json`
+
+What an installer reads to install the mod. A writer makes it from the game's
+`game.json` (section 7) and the game's build configuration. Its fields, and
+where each comes from:
+
+| Field | From |
+|---|---|
+| `id`, `name`, `game`, `appid`, `description` | `game.json` |
+| `exe`, `launchArgs`, `steamAppIdFile`, `loaderConfig` | `game.json` `install` |
+| `testedBuildIds`, `firstLaunch`, `needToKnow` | `game.json` |
+| `tutorial` | `game.json`, with each step's controls resolved to `[input, action]` pairs |
+| `sharedOptions`, `options` | `game.json` `settings.shared`, `settings.options` |
+| `video` | `game.json` `media`, the entry with `role: "hover"` |
+| `loader` | build configuration: `{type, version}`, plus `url` and `sha256` for a loader the installer downloads |
+| `payload` | build configuration: the payload folder, default `payload` |
+| `plugin` | build configuration: `{folder, config}` |
+| `uevr` | build configuration, Unreal mods only: `{process, attachDelay, profile}` |
+
+Nothing else goes into `mod.json`. The rest of a build configuration (project,
+archive, files to strip or copy...) is for building only, and a writer leaves
+it out. A field `game.json` owns may not also be set in the build
+configuration: a writer refuses that rather than pick one.
+
 ## 4. Signatures
 
 - **Algorithm:** Ed25519.
