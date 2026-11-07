@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "game.schema.json",
+  "title": "data/game.json, one game's facts and text (docs/SPEC.md section 7). Cross-checks a schema can't express (tutorial inputs exist in controls, media files exist, one hero) are in lib/modjson.js checkGameData.",
+  "type": "object",
+  "required": ["id", "name", "game", "appid", "tagline", "description", "firstLaunch", "controls", "tutorial", "install", "testedBuildIds", "media"],
+  "properties": {
+    "id": { "$ref": "common.defs.json#/$defs/id" },
+    "name": { "$ref": "common.defs.json#/$defs/text" },
+    "game": { "$ref": "common.defs.json#/$defs/text" },
+    "appid": { "$ref": "common.defs.json#/$defs/appid" },
+    "tagline": { "$ref": "common.defs.json#/$defs/text" },
+    "description": { "$ref": "common.defs.json#/$defs/text" },
+    "requirements": { "type": "array", "items": { "$ref": "common.defs.json#/$defs/text" } },
+    "firstLaunch": { "$ref": "common.defs.json#/$defs/text" },
+    "needToKnow": { "type": "array", "items": { "$ref": "common.defs.json#/$defs/text" } },
+    "controls": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["input", "action"],
+        "properties": {
+          "input": { "$ref": "common.defs.json#/$defs/text" },
+          "action": { "$ref": "common.defs.json#/$defs/text" },
+          "primary": { "type": "boolean" }
+        }
+      }
+    },
+    "tutorial": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["title", "text", "controls"],
+        "properties": {
+          "title": { "$ref": "common.defs.json#/$defs/text" },
+          "text": { "$ref": "common.defs.json#/$defs/text" },
+          "controls": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                { "$ref": "common.defs.json#/$defs/text" },
+                {
+                  "type": "object",
+                  "required": ["input"],
+                  "properties": { "input": { "$ref": "common.defs.json#/$defs/text" }, "action": { "$ref": "common.defs.json#/$defs/text" } }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "install": {
+      "type": "object",
+      "required": ["exe"],
+      "properties": {
+        "exe": { "$ref": "common.defs.json#/$defs/text" },
+        "launchArgs": { "type": "string" },
+        "steamAppIdFile": { "type": "boolean" },
+        "loaderConfig": { "type": "object", "additionalProperties": { "type": "object" } }
+      }
+    },
+    "settings": {
+      "type": "object",
+      "properties": {
+        "shared": { "type": "object", "additionalProperties": { "$ref": "#/$defs/cfg" } },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "label", "type", "cfg"],
+            "properties": {
+              "id": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9]*$" },
+              "label": { "$ref": "common.defs.json#/$defs/text" },
+              "help": { "$ref": "common.defs.json#/$defs/text" },
+              "type": { "enum": ["bool", "number", "choice"] },
+              "cfg": { "$ref": "#/$defs/cfg" },
+              "min": { "type": "number" },
+              "max": { "type": "number" },
+              "step": { "type": "number" },
+              "choices": {
+                "type": "array", "minItems": 1,
+                "items": { "type": "object", "required": ["value", "label"], "properties": { "label": { "$ref": "common.defs.json#/$defs/text" } } }
+              }
+            },
+            "allOf": [
+              { "if": { "properties": { "type": { "const": "choice" } } }, "then": { "required": ["choices"] } },
+              { "if": { "properties": { "type": { "const": "number" } } }, "then": { "required": ["min", "max", "step"] } }
+            ]
+          }
+        }
+      }
+    },
+    "testedBuildIds": { "allOf": [{ "$ref": "common.defs.json#/$defs/buildIds" }, { "minItems": 1 }] },
+    "owners": {
+      "type": "object",
+      "required": ["developer", "publisher"],
+      "properties": { "developer": { "$ref": "common.defs.json#/$defs/text" }, "publisher": { "$ref": "common.defs.json#/$defs/text" } }
+    },
+    "credits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "license"],
+        "properties": {
+          "name": { "$ref": "common.defs.json#/$defs/text" },
+          "for": { "$ref": "common.defs.json#/$defs/text" },
+          "license": { "$ref": "common.defs.json#/$defs/text" },
+          "url": { "$ref": "common.defs.json#/$defs/url" },
+          "support": {
+            "type": "array",
+            "items": {
+              "type": "object", "required": ["label", "url"],
+              "properties": { "label": { "$ref": "common.defs.json#/$defs/text" }, "url": { "$ref": "common.defs.json#/$defs/url" } }
+            }
+          },
+          "highlight": { "type": "boolean" }
+        }
+      }
+    },
+    "media": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["file", "kind", "alt"],
+        "properties": {
+          "file": { "$ref": "#/$defs/dataPath" },
+          "kind": { "enum": ["image", "video"] },
+          "role": { "enum": ["hero", "turntable", "gallery", "hover"] },
+          "alt": { "$ref": "common.defs.json#/$defs/text" },
+          "poster": { "$ref": "#/$defs/dataPath" }
+        }
+      }
+    },
+    "mediaGaps": { "type": "array", "items": { "$ref": "common.defs.json#/$defs/text" } }
+  },
+  "$defs": {
+    "cfg": {
+      "type": "object",
+      "required": ["section", "key"],
+      "properties": { "section": { "$ref": "common.defs.json#/$defs/text" }, "key": { "$ref": "common.defs.json#/$defs/text" } }
+    },
+    "dataPath": {
+      "type": "string",
+      "description": "A forward-slash path inside data/: no .., no leading slash, no drive letter or backslash.",
+      "pattern": "^(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!(.*/)?\\.\\.(/|$))[^\\s][^\\x00-\\x1f]*$"
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "id": "fake-vr",
+  "name": "Fake Game VR",
+  "game": "Fake Game",
+  "appid": 4242,
+  "owners": { "developer": "Fake Studio", "publisher": "Fake Publisher" },
+  "tagline": "A pretend game on a pretend table.",
+  "description": "Fake Game VR is test data for dvr-package. Nothing here is a real game.",
+  "requirements": ["A headset you can pretend with."],
+  "firstLaunch": "The first start takes a moment.",
+  "needToKnow": ["Click the right stick to tilt."],
+  "controls": [
+    { "input": "Right trigger", "action": "Click", "primary": true },
+    { "input": "Either grip", "action": "Move the table", "primary": true },
+    { "input": "Right stick", "action": "Pan around" },
+    { "input": "Click the left stick", "action": "Open or close the VR menu" }
+  ],
+  "tutorial": [
+    { "title": "Getting started", "text": "Load a save.", "controls": [] },
+    { "title": "Move the table", "text": "Reach out and grab it.",
+      "controls": ["Either grip", { "input": "Right stick", "action": "Pan around the table" }, "Right trigger"] },
+    { "title": "The VR menu", "text": "Settings live here.", "controls": ["Click the left stick"] }
+  ],
+  "install": {
+    "exe": "FakeGame.exe",
+    "launchArgs": "-force-d3d11",
+    "steamAppIdFile": true,
+    "loaderConfig": { "Logging.Console": { "Enabled": false } }
+  },
+  "settings": {
+    "shared": { "leftHanded": { "section": "Controls", "key": "LeftHanded" } },
+    "options": [
+      { "id": "desktopView", "label": "Keep the monitor view", "help": "Costs frame rate.", "type": "bool", "default": false,
+        "cfg": { "section": "Graphics", "key": "DesktopView" } }
+    ]
+  },
+  "testedBuildIds": ["123456"],
+  "credits": [ { "name": "Some Library", "for": "Loading the mod", "license": "MIT", "url": "https://example.org/" } ],
+  "media": [
+    { "file": "media/hero.jpg", "kind": "image", "role": "hero", "alt": "The fake table." },
+    { "file": "media/hover.webm", "kind": "video", "role": "hover", "alt": "The fake table, turning." }
+  ]
+}

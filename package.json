@@ -1,0 +1,30 @@
+{
+  "name": "dvr-package",
+  "version": "0.1.0",
+  "description": "The DioramaVR mod package format: spec, schemas, writer (pack, licences, sign, index, registry) and reader (verify, unpack)",
+  "license": "MIT",
+  "author": "scrire",
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "lib/index.js",
+  "bin": {
+    "dvr-pack": "bin/dvr-pack.js",
+    "dvr-verify": "bin/dvr-verify.js",
+    "dvr-sign": "bin/dvr-sign.js",
+    "dvr-licenses": "bin/dvr-licenses.js",
+    "dvr-index": "bin/dvr-index.js",
+    "dvr-registry": "bin/dvr-registry.js"
+  },
+  "files": [
+    "lib",
+    "bin",
+    "schemas",
+    "trusted-keys.json",
+    "docs"
+  ],
+  "scripts": {
+    "test": "node --test test/",
+    "fixtures": "node test/fixtures/make-fixtures.js"
+  }
+}

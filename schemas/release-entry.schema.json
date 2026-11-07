@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "release-entry.schema.json",
+  "title": "A release entry: the manifest's release fields plus url, sha256 and size (docs/SPEC.md section 5). pack writes one per zip; url may be missing until it's published.",
+  "type": "object",
+  "required": ["version", "maturity", "date", "minAppVersion", "sha256", "size", "source"],
+  "properties": {
+    "version": { "$ref": "common.defs.json#/$defs/version" },
+    "maturity": { "$ref": "common.defs.json#/$defs/maturity" },
+    "date": { "$ref": "common.defs.json#/$defs/date" },
+    "coreVersion": { "$ref": "common.defs.json#/$defs/version" },
+    "minAppVersion": { "$ref": "common.defs.json#/$defs/version" },
+    "testedBuildIds": { "$ref": "common.defs.json#/$defs/buildIds" },
+    "notes": { "$ref": "common.defs.json#/$defs/text" },
+    "source": { "$ref": "common.defs.json#/$defs/source" },
+    "url": { "$ref": "common.defs.json#/$defs/url" },
+    "sha256": { "$ref": "common.defs.json#/$defs/sha256" },
+    "size": { "type": "integer", "minimum": 1 }
+  }
+}
