@@ -31,6 +31,7 @@
         "size": { "type": "integer", "minimum": 1 },
         "date": { "$ref": "common.defs.json#/$defs/date" }
       }
-    }
+    },
+    "assets": { "$ref": "media.schema.json#/$defs/assets" }
   }
 }

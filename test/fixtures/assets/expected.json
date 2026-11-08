@@ -1,0 +1,13 @@
+{
+  "fake-vr": [],
+  "flagged-vr": [
+    [
+      "metadata",
+      "media/hero.jpg"
+    ],
+    [
+      "metadata",
+      "media/gallery-1.png"
+    ]
+  ]
+}
