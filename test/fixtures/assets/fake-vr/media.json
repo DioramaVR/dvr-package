@@ -1,0 +1,28 @@
+{
+  "format": 1,
+  "id": "fake-vr",
+  "media": [
+    {
+      "file": "hero.jpg",
+      "kind": "image",
+      "role": "hero",
+      "alt": "A grey square standing in for a hero picture."
+    },
+    {
+      "file": "turntable.webm",
+      "kind": "video",
+      "role": "turntable",
+      "alt": "A pretend table, turning.",
+      "poster": "turntable-poster.png",
+      "sources": [
+        "turntable.mp4"
+      ]
+    },
+    {
+      "file": "gallery-1.png",
+      "kind": "image",
+      "role": "gallery",
+      "alt": "A single dark pixel."
+    }
+  ]
+}

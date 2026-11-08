@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "media.schema.json",
+  "title": "<game>/media.json in the assets repo: a game's pictures and videos (docs/SPEC.md section 12). The same list is copied unchanged into the index's assets.media. Cross-checks a schema can't express (one hero, at most one turntable, each type fits its kind) are in lib/game-assets.js.",
+  "type": "object",
+  "required": ["format", "id", "media"],
+  "properties": {
+    "format": { "const": 1 },
+    "id": { "$ref": "common.defs.json#/$defs/id" },
+    "media": { "$ref": "#/$defs/list" }
+  },
+  "$defs": {
+    "list": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/entry" }
+    },
+    "entry": {
+      "type": "object",
+      "required": ["file", "kind", "alt"],
+      "properties": {
+        "file": { "$ref": "#/$defs/fileName" },
+        "kind": { "enum": ["image", "video"] },
+        "role": { "enum": ["hero", "turntable", "gallery"] },
+        "alt": { "$ref": "common.defs.json#/$defs/text" },
+        "poster": { "$ref": "#/$defs/fileName" },
+        "sources": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/fileName" } }
+      }
+    },
+    "fileName": {
+      "type": "string",
+      "description": "A flat file name, unique per game: lower case, no slashes; .jpg .jpeg .png .webp .webm or .mp4.",
+      "pattern": "^[a-z0-9][a-z0-9._-]*\\.(jpg|jpeg|png|webp|webm|mp4)$"
+    },
+    "file": {
+      "type": "object",
+      "required": ["url", "sha256", "size"],
+      "properties": {
+        "url": { "type": "string", "pattern": "^https://[^\\s/]+/[^\\s]*$", "description": "https only." },
+        "sha256": { "$ref": "common.defs.json#/$defs/sha256" },
+        "size": { "type": "integer", "minimum": 1, "maximum": 67108864 }
+      }
+    },
+    "assets": {
+      "type": "object",
+      "description": "The index's assets list (SPEC section 12).",
+      "required": ["release", "date", "files", "media"],
+      "properties": {
+        "release": { "type": "string", "pattern": "^assets-[1-9][0-9]*$" },
+        "date": { "$ref": "common.defs.json#/$defs/date" },
+        "files": {
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/fileName" },
+          "additionalProperties": { "$ref": "#/$defs/file" }
+        },
+        "media": { "$ref": "#/$defs/list" }
+      }
+    }
+  }
+}
