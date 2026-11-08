@@ -38,7 +38,7 @@ test('PackageError carries a known code', () => {
   assert.ok(e instanceof Error);
   assert.deepStrictEqual([e.name, e.code, e.details], ['PackageError', 'hash', ['a']]);
   assert.throws(() => new PackageError('nope', 'x'), /unknown PackageError code/);
-  assert.strictEqual(CODES.length, 15);
+  assert.strictEqual(CODES.length, 16);
 });
 
 test('zip: sorted entries, fixed timestamps, same input gives the same bytes; tar reads it', () => {

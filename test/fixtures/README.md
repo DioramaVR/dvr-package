@@ -37,3 +37,18 @@ node test/fixtures/make-data-fixtures.js [out folder]
 
 The bytes never depend on the day they're made, so re-running gives the same
 zips; the tests check that the committed ones match.
+
+## Game media (`assets/`)
+
+`assets/` holds two game folders as the assets repo has them (docs/SPEC.md
+section 12): `media.json` and `media/`. Every picture is made up byte by
+byte by `make-assets-fixtures.js`: an 8x8 grey JPG and 1x1 PNGs, which
+decode, and video stubs with only the right first bytes, which don't play.
+`fake-vr/` is clean; `flagged-vr/` is the same, except that its JPG carries
+an (empty) Exif segment and its PNG a `tEXt` chunk. `assets/expected.json`
+lists the problems `gameAssets.check` must report for each, as
+`[code, path]`.
+
+```
+node test/fixtures/make-assets-fixtures.js [out folder]
+```

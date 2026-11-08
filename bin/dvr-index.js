@@ -8,6 +8,7 @@
 //   dvr-index mod-json <data dir> <build.json> <out>     mod.json for the installer
 //   dvr-index set-data <index.json> --url U --sha256 H --size N --date YYYY-MM-DD [--known-issues <data.json | known-issues.json>]
 //                                                        the game's data zip (section 11), in place
+//   dvr-index set-assets <index.json> <assets.json>      the game's media list (section 12, dvr-assets build's), in place
 //
 // <data dir> is a game repo's data/ folder. "-" as the previous index means the
 // game's first release. Output is canonical JSON with LF line ends.
@@ -101,4 +102,10 @@ if (cmd === 'add') {
   const data = { url: a.url, sha256: a.sha256, size: Number(a.size), date: a.date };
   writeOut(file, attempt(() => ix.setData(readJson(file), data, issues)));
   console.log(`dvr-index: ${file} data -> ${a.url} (${a.size} bytes, ${a.date})${issues ? `; ${issues.length} known issue(s)` : ''}`);
+} else if (cmd === 'set-assets') {
+  const [file, assetsFile] = a._;
+  if (!file || !assetsFile || a._.length !== 2 || Object.keys(a).length !== 1) usage();
+  const assets = readJson(assetsFile);
+  writeOut(file, attempt(() => ix.setAssets(readJson(file), assets)));
+  console.log(`dvr-index: ${file} assets -> ${assets.release} (${Object.keys(assets.files).length} file(s), ${assets.media.length} media)`);
 } else usage();

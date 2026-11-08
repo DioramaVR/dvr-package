@@ -256,7 +256,7 @@ test('the public index: exports load lazily; w2 parts may be missing on this bra
   assert.strictEqual(api.FORMAT, 1);
   for (const k of ['reader', 'writer', 'sign', 'licenses', 'privacy', 'version', 'zip', 'errors', 'dataZip']) assert.ok(api[k], k);
   assert.strictEqual(api.PackageError, require('../lib/errors').PackageError);
-  assert.deepStrictEqual(Object.keys(api).sort(), ['FORMAT', 'PackageError', 'dataZip', 'errors', 'index', 'licenses', 'modJson', 'privacy', 'reader', 'registry', 'schemas', 'sign', 'version', 'writer', 'zip']);
+  assert.deepStrictEqual(Object.keys(api).sort(), ['FORMAT', 'PackageError', 'dataZip', 'errors', 'gameAssets', 'index', 'licenses', 'modJson', 'privacy', 'reader', 'registry', 'schemas', 'sign', 'version', 'writer', 'zip']);
 });
 
 test('credits: a copy of credits.json at the zip root, hashed and signed; a bad one is refused', () => {

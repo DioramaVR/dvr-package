@@ -16,6 +16,7 @@ disagree, this document wins and the schema is a bug.
 - [9. Error codes](#9-error-codes)
 - [10. Changing the format](#10-changing-the-format)
 - [11. Game data zip (`<id>-data.zip`)](#11-game-data-zip-id-datazip)
+- [12. Game media (the index's `assets`)](#12-game-media-the-indexs-assets)
 
 ## 1. Overview
 
@@ -28,8 +29,10 @@ registry.json            every game, its wave and status, where its index is,
        │    dvr-package.json  the manifest: what the zip holds, file hashes
        │    dvr-package.sig   the manifest's signature
        │    mod.json, payload/, ...
-       └─ <id>-data.zip  the game's page: text, known issues, credits and
-                         media (section 11), checked against the index
+       ├─ <id>-data.zip  the game's page: text, known issues, credits and
+       │                 media (section 11), checked against the index
+       └─ assets.files   the game's pictures and videos, one file each
+                         (section 12), each checked against the index
 ```
 
 A reader starts from the registry URL it was built with, fetches a game's
@@ -232,6 +235,9 @@ One per game, served next to its signature.
   release: adding a release or promoting one keeps it as it was, and only a
   new data zip changes it. Until installers read the data zip, `knownIssues`
   here is kept equal to the zip's.
+- **`assets`** (optional): the game's media, each file listed with its URL,
+  SHA-256 and size (section 12). Like `data`, it isn't part of any release:
+  adding or promoting a release, or a new data zip, keeps it as it was.
 
 ## 6. Registry (`registry.json`)
 
@@ -418,7 +424,8 @@ verdict for a given file:
 
 Writers also refuse to produce a release for these reasons:
 `not-release-build`, `core-not-tagged`, `no-licences`, `unity-files`,
-`private-path` (a payload containing the build machine's home-folder path).
+`private-path` (a payload containing the build machine's home-folder path),
+`metadata` (a picture carrying Exif, XMP, IPTC or PNG text metadata; section 12).
 
 ## 10. Changing the format
 
@@ -508,3 +515,86 @@ only after every check, into a new or empty folder.
 A release on the game's public repository: tag `data-N` (N is the highest
 existing plus one), asset `<id>-data.zip`, not marked latest, not a
 pre-release. Earlier `data-N` releases are kept.
+
+## 12. Game media (the index's `assets`)
+
+A game's pictures and videos, published one file at a time and listed in its
+signed index. They come from the assets repo, one folder per game:
+
+```
+<id>/media.json     the media list
+<id>/media/<file>   every file it names, and nothing else
+```
+
+### `media.json`
+
+```json
+{
+  "format": 1,
+  "id": "fake-vr",
+  "media": [
+    { "file": "hero.jpg", "kind": "image", "role": "hero", "alt": "Plain text." },
+    { "file": "turntable-720.webm", "kind": "video", "role": "turntable", "alt": "Plain text.",
+      "poster": "turntable-poster.jpg", "sources": ["turntable-720.mp4"] },
+    { "file": "headset-view.jpg", "kind": "image", "role": "gallery", "alt": "Plain text." }
+  ]
+}
+```
+
+- `id` is the game's id and the folder's name.
+- `media[]`: `file`, `kind` (`image` or `video`) and `alt` required.
+  `role` is `hero`, `turntable` or `gallery` (no role: a gallery item).
+  There is exactly one hero and at most one turntable. `hover` is gone: a
+  reader that wants a hover clip derives it from the turntable.
+- `poster` (an image) and `sources` (other encodings of a video, such as an
+  MP4 for Safari) are optional. A reader plays `file`, or the first of
+  `sources` it can. The type comes from the extension.
+- **File names** are flat and unique per game: `[a-z0-9][a-z0-9._-]*` with
+  one of `.jpg .jpeg .png .webp` (images and posters) or `.webm .mp4`
+  (videos and sources). No slashes.
+- Each file is at most 64 MB, and its bytes must be the type its name says.
+
+### Metadata
+
+Pictures are published byte for byte as committed, so a writer **flags**
+metadata and never strips it (`metadata`): in a JPG, APP1 (Exif, XMP) and
+APP13 (IPTC) segments; in a PNG, `tEXt`, `zTXt`, `iTXt`, `eXIf` and
+`tIME` chunks. The fix is to strip the file and commit it again.
+
+### In the index
+
+```json
+"assets": {
+  "release": "assets-1",
+  "date": "2026-11-08",
+  "files": {
+    "hero.jpg": { "url": "https://example.org/releases/download/assets-1/hero.jpg",
+                  "sha256": "<SHA-256 of the file>", "size": 280729 }
+  },
+  "media": [ <media.json's media, unchanged> ]
+}
+```
+
+- `release` is the `assets-N` release the files are in; `date` when it was
+  made.
+- `files` has exactly one entry per name `media` uses (each `file`,
+  `poster` and `sources[]`): nothing extra, nothing missing.
+- `url` is `https` only. `sha256` is either case (writers emit lower case).
+  `size` is in bytes, at most 64 MB.
+- `media` is `media.json`'s list as it is.
+- **Precedence:** when an index has `assets`, readers take the game's media
+  from it and ignore the data zip's `media` and media files.
+
+### Reading
+
+A reader downloads each file it needs on its own and checks its size, then
+its SHA-256, against `files` before using it. A file that isn't listed, or
+doesn't match, is refused (`extra-file`, `hash`). The host isn't pinned:
+the signed index is what makes a file trusted. Files may be cached by hash.
+
+### Hosting
+
+A release on the game's public repository: tag `assets-N` (N is the highest
+existing plus one), every file an asset under its own name, not marked
+latest. Earlier `assets-N` releases are kept, so cached URLs stay valid. The
+index is then updated with the new `assets` and re-signed in one commit.

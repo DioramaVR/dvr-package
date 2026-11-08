@@ -1,6 +1,6 @@
 {
   "name": "dvr-package",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "The DioramaVR mod package format: spec, schemas, writer (pack, licences, sign, index, registry) and reader (verify, unpack)",
   "license": "MIT",
   "author": "scrire",
@@ -15,7 +15,8 @@
     "dvr-licenses": "bin/dvr-licenses.js",
     "dvr-index": "bin/dvr-index.js",
     "dvr-registry": "bin/dvr-registry.js",
-    "dvr-data": "bin/dvr-data.js"
+    "dvr-data": "bin/dvr-data.js",
+    "dvr-assets": "bin/dvr-assets.js"
   },
   "files": [
     "lib",
