@@ -1,6 +1,6 @@
 {
   "name": "dvr-package",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "The DioramaVR mod package format: spec, schemas, writer (pack, licences, sign, index, registry) and reader (verify, unpack)",
   "license": "MIT",
   "author": "scrire",
