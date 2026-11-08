@@ -6,6 +6,8 @@
 //   dvr-index check <index.json>
 //   dvr-index check-data <data dir>                      game.json + known-issues.json (+ media files)
 //   dvr-index mod-json <data dir> <build.json> <out>     mod.json for the installer
+//   dvr-index set-data <index.json> --url U --sha256 H --size N --date YYYY-MM-DD [--known-issues <data.json | known-issues.json>]
+//                                                        the game's data zip (section 11), in place
 //
 // <data dir> is a game repo's data/ folder. "-" as the previous index means the
 // game's first release. Output is canonical JSON with LF line ends.
@@ -75,7 +77,7 @@ if (cmd === 'add') {
   const { game, issues } = mj.readGameData(dataDir);
   const ps = mj.checkGameData(game, issues, { dataDir });
   if (ps.length) problems(dataDir, ps);
-  console.log(`dvr-index: ${game.id}: game.json and known-issues.json are fine (${game.controls.length} controls, ${game.tutorial.length} tutorial steps, ${game.media.length} media, ${issues.length} known issues)`);
+  console.log(`dvr-index: ${game.id}: game.json and known-issues.json are fine (${(game.controls || []).length} controls, ${game.tutorial.length} tutorial steps, ${game.media.length} media, ${issues.length} known issues)`);
 } else if (cmd === 'mod-json') {
   const [dataDir, buildFile, out] = a._;
   if (!dataDir || !buildFile || !out) usage();
@@ -85,4 +87,18 @@ if (cmd === 'add') {
   const mod = attempt(() => mj.toModJson(game, readJson(buildFile)));
   writeOut(out, mod);
   console.log(`dvr-index: mod.json for ${mod.id} -> ${out}${mod.video ? ` (copy data/${mod.video} next to it)` : ''}`);
+} else if (cmd === 'set-data') {
+  const [file] = a._;
+  if (!file || a._.length !== 1 || !a.url || !a.sha256 || !a.size || !a.date) usage();
+  if (!/^[0-9]+$/.test(a.size)) { console.error(`dvr-index: --size must be a whole number of bytes, not "${a.size}"`); process.exit(2); }
+  let issues;
+  if (a['known-issues']) {
+    // A data.json (its knownIssues; none listed = none) or a known-issues.json (the list).
+    const doc = readJson(a['known-issues']);
+    issues = Array.isArray(doc) ? doc : doc && typeof doc === 'object' && doc.format !== undefined ? (doc.knownIssues || []) : null;
+    if (!Array.isArray(issues)) { console.error(`dvr-index: ${a['known-issues']} is neither a data.json nor a known-issues.json`); process.exit(2); }
+  }
+  const data = { url: a.url, sha256: a.sha256, size: Number(a.size), date: a.date };
+  writeOut(file, attempt(() => ix.setData(readJson(file), data, issues)));
+  console.log(`dvr-index: ${file} data -> ${a.url} (${a.size} bytes, ${a.date})${issues ? `; ${issues.length} known issue(s)` : ''}`);
 } else usage();

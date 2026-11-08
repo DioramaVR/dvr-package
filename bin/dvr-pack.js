@@ -21,9 +21,9 @@ const path = require('path');
 const { parse, die, refuse, trustedFrom } = require('./_cli');
 const writer = require('../lib/writer');
 
-const USAGE = 'usage: dvr-pack <mod folder> --min-app-version V [--out DIR] [--version V] [--maturity closed-beta|open-beta|stable] [--date YYYY-MM-DD] [--notes TEXT] [--known-issues FILE] [--actions-commit SHA] [--sign] [--trusted-keys FILE] [--check]';
+const USAGE = 'usage: dvr-pack <mod folder> --min-app-version V [--out DIR] [--version V] [--maturity closed-beta|open-beta|stable] [--date YYYY-MM-DD] [--notes TEXT] [--known-issues FILE] [--credits FILE] [--actions-commit SHA] [--sign] [--trusted-keys FILE] [--check]';
 const o = parse(process.argv.slice(2),
-  ['--out', '--version', '--maturity', '--date', '--min-app-version', '--notes', '--known-issues', '--actions-commit', '--trusted-keys'],
+  ['--out', '--version', '--maturity', '--date', '--min-app-version', '--notes', '--known-issues', '--credits', '--actions-commit', '--trusted-keys'],
   ['--sign', '--check'], USAGE);
 const modDir = o._[0];
 if (o._.length !== 1 || !fs.existsSync(path.join(modDir, 'mod.json'))) die(2, USAGE);
@@ -40,7 +40,7 @@ let res;
 try {
   res = writer.pack(path.resolve(modDir), outDir, {
     version: o.version, maturity: o.maturity, date: o.date, minAppVersion: o['min-app-version'],
-    notes: o.notes, knownIssues, actionsCommit: o['actions-commit'], sign: !!o.sign, trustedKeys,
+    notes: o.notes, knownIssues, credits: o.credits ? path.resolve(o.credits) : undefined, actionsCommit: o['actions-commit'], sign: !!o.sign, trustedKeys,
   });
 } catch (e) { refuse(e); }
 const { zip, manifest, key } = res;

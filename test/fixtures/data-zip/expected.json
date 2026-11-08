@@ -1,0 +1,19 @@
+{
+  "good.zip": "ok",
+  "extra-file.zip": "extra-file",
+  "extra-credits.zip": "extra-file",
+  "folder-entry.zip": "extra-file",
+  "subfolder-file.zip": "extra-file",
+  "missing-file.zip": "missing-file",
+  "no-data-json.zip": "missing-file",
+  "unsafe-path.zip": "unsafe-path",
+  "backslash.zip": "unsafe-path",
+  "case-clash.zip": "unsafe-path",
+  "subfolder-named.zip": "format",
+  "wrong-type.zip": "format",
+  "wrong-kind.zip": "format",
+  "no-line.zip": "format",
+  "newer-format.zip": "format",
+  "bad-json.zip": "format",
+  "not-a-zip.zip": "not-a-mod"
+}

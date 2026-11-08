@@ -20,6 +20,17 @@
         ]
       }
     },
-    "knownIssues": { "$ref": "common.defs.json#/$defs/knownIssues" }
+    "knownIssues": { "$ref": "common.defs.json#/$defs/knownIssues" },
+    "data": {
+      "type": "object",
+      "description": "The game's data zip (SPEC section 11): readers check its size and SHA-256.",
+      "required": ["url", "sha256", "size", "date"],
+      "properties": {
+        "url": { "$ref": "common.defs.json#/$defs/url" },
+        "sha256": { "$ref": "common.defs.json#/$defs/sha256" },
+        "size": { "type": "integer", "minimum": 1 },
+        "date": { "$ref": "common.defs.json#/$defs/date" }
+      }
+    }
   }
 }
