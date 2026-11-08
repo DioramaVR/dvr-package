@@ -20,7 +20,7 @@ test('the fixture data is fine, media files included', () => {
 test('problems a schema alone can\'t see', () => {
   const { game, issues } = fresh();
   game.controls.push({ input: 'Right trigger', action: 'Again' });
-  game.tutorial[1].controls.push('Left trigger', { input: 'Nope', action: 'x' });
+  game.tutorial[1].controls.push('Left trigger', { input: 'Nope' });
   game.settings.options.push({ id: 'leftHanded', label: 'L', type: 'bool', cfg: { section: 'S', key: 'K' } });
   game.media = [{ file: 'media/missing.jpg', kind: 'image', role: 'gallery', alt: 'x' }];
   issues.push({ ...issues[0] });
@@ -30,6 +30,20 @@ test('problems a schema alone can\'t see', () => {
     assert.ok(ps.some((p) => re.test(p)), `${re} in\n${ps.join('\n')}`);
   }
   assert.ok(!mj.checkGameData(game, issues).some((p) => /doesn't exist/.test(p)), 'files are only checked with dataDir');
+});
+
+test('with no controls table, {input, action} tutorial controls stand alone', () => {
+  const { game, issues } = fresh();
+  delete game.controls;
+  for (const step of game.tutorial) step.controls = [{ input: 'Right trigger', action: 'Pick up' }];
+  assert.deepStrictEqual(mj.checkGameData(game, issues, { dataDir }), []);
+  assert.deepStrictEqual(mj.toModJson(game, build()).tutorial[0].controls[0], ['Right trigger', 'Pick up']);
+  // A bare input, or {input} with no action, still needs the table.
+  game.tutorial[0].controls.push('Right trigger', { input: 'Grip' });
+  const ps = mj.checkGameData(game, issues, { dataDir });
+  assert.ok(ps.some((p) => /tutorial\/0\/controls\/1: "Right trigger" isn't an input/.test(p)), ps.join('\n'));
+  assert.ok(ps.some((p) => /tutorial\/0\/controls\/2: "Grip" isn't an input/.test(p)), ps.join('\n'));
+  assert.strictEqual(ps.length, 2, ps.join('\n'));
 });
 
 test('mod.json in the engine\'s shape', () => {
