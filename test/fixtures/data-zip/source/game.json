@@ -1,0 +1,26 @@
+{
+  "id": "fake-vr",
+  "name": "Fake Game VR",
+  "game": "Fake Game",
+  "appid": 4242,
+  "owners": { "developer": "Fake Studio", "publisher": "Fake Publisher" },
+  "tagline": "A pretend game on a pretend table.",
+  "line": "Your pretend table, life size.",
+  "firstLaunch": "The first start takes a moment.",
+  "needToKnow": ["Click the right stick to tilt.", "Needs a headset you can pretend with."],
+  "tutorial": [
+    { "title": "Getting started", "text": "Load a save.", "controls": [] },
+    { "title": "Move the table", "text": "Reach out and grab it.", "controls": [] }
+  ],
+  "install": { "exe": "FakeGame.exe", "steamAppIdFile": true },
+  "testedBuildIds": ["123456"],
+  "credits": [ { "name": "Some Library", "for": "Loading the mod", "license": "MIT", "url": "https://example.org/" } ],
+  "media": [
+    { "file": "media/hero.jpg", "kind": "image", "role": "hero", "alt": "The fake table." },
+    { "file": "media/turntable.webm", "kind": "video", "role": "turntable", "alt": "The fake table, turning.",
+      "poster": "media/turntable-poster.jpg", "sources": ["media/turntable.mp4"] },
+    { "file": "media/turntable.webm", "kind": "video", "role": "hover", "alt": "The fake table, turning." },
+    { "file": "media/gallery-1.png", "kind": "image", "role": "gallery", "alt": "A closer look." }
+  ],
+  "mediaGaps": ["A second gallery image."]
+}

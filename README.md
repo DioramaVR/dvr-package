@@ -3,20 +3,22 @@
 The DioramaVR mod package format, and both ends of it.
 
 - **Spec:** [docs/SPEC.md](docs/SPEC.md): the package zip and its manifest,
-  signatures, the game index, the registry, game data, reader behaviour and
-  error codes.
+  signatures, the game index, the registry, game data, reader behaviour,
+  error codes and the game's data zip.
 - **Schemas:** `schemas/*.json` (JSON Schema 2020-12) for the manifest, a
-  release entry, the index, the registry, `game.json` and `known-issues.json`.
+  release entry, the index, the registry, `game.json`, `known-issues.json`,
+  `credits.json` and a data zip's `data.json`.
 - **Reader:** check and unpack a package zip (paths, hashes, Ed25519
   signature against `trusted-keys.json`, app version).
 - **Writer:** pack a built mod folder into a deterministic, signed zip; write
   licence notices; add a release to an index; edit a registry; make `mod.json`
-  from `game.json`.
+  from `game.json`; pack a game's data zip (`<id>-data.zip`).
 - **Fixtures:** `test/fixtures/`, sample zips with the verdict any reader must
   reach (`expected.json`).
 
 Node 20 or later, no dependencies. Zips are made and read with the `tar` that
-ships with Windows (bsdtar).
+ships with Windows (bsdtar). The data zip is made and read in plain Node, so
+it works anywhere Node does (the website builds on Linux).
 
 ## Use
 
@@ -34,11 +36,16 @@ const { id, version, maturity, dir, manifest } = reader.unpack(zipPath, cacheDir
 
 // Validate a document against a schema: [] when it's valid.
 const problems = schemas.validate(doc, 'registry');
+
+// A game's data zip (SPEC section 11): pack data/, read one back with the index's size and hash.
+const { dataZip } = require('dvr-package');
+const { zip, sha256, size, warnings } = dataZip.pack('data', 'out', { date: '2026-11-20' });
+const { data, files } = dataZip.read(zip, { sha256, size, id: 'fake-vr' }); // files: Map name -> Buffer
 ```
 
 Command line (`node bin/dvr-<name>.js`, or `npx dvr-<name>` when installed):
 `dvr-verify`, `dvr-pack`, `dvr-sign`, `dvr-licenses`, `dvr-index`,
-`dvr-registry`. Each prints its usage when run without arguments.
+`dvr-registry`, `dvr-data`. Each prints its usage when run without arguments.
 
 Signing reads the private key from the `DVR_SIGNING_KEY` environment variable
 only, and checks each new signature against `trusted-keys.json` before writing
@@ -49,6 +56,7 @@ it.
 ```
 npm test            # node --test
 npm run fixtures    # rebuild test/fixtures (byte-identical unless the format changed)
+node test/fixtures/make-data-fixtures.js   # rebuild test/fixtures/data-zip
 ```
 
 ## Licence

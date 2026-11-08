@@ -47,6 +47,26 @@
         "since": { "$ref": "#/$defs/version" },
         "fixedIn": { "anyOf": [{ "$ref": "#/$defs/version" }, { "type": "null" }] }
       }
+    },
+    "credits": { "type": "array", "items": { "$ref": "#/$defs/credit" }, "description": "Credits, in display order (SPEC section 7)." },
+    "credit": {
+      "type": "object",
+      "required": ["name", "license"],
+      "properties": {
+        "name": { "$ref": "#/$defs/text" },
+        "for": { "$ref": "#/$defs/text" },
+        "license": { "$ref": "#/$defs/text" },
+        "url": { "$ref": "#/$defs/url" },
+        "support": {
+          "type": "array",
+          "items": {
+            "type": "object", "required": ["label", "url"],
+            "properties": { "label": { "$ref": "#/$defs/text" }, "url": { "$ref": "#/$defs/url" } }
+          }
+        },
+        "highlight": { "type": "boolean" },
+        "notice": { "$ref": "#/$defs/text", "description": "Where the full licence notice is, in what ships." }
+      }
     }
   }
 }
