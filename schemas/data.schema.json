@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "data.schema.json",
+  "title": "data.json in a game's data zip, <id>-data.zip (docs/SPEC.md section 11). Cross-checks a schema can't express (each media type fits its kind, every named file is in the zip and nothing else is, known-issue ids used once) are in lib/datazip.js.",
+  "type": "object",
+  "required": ["format", "id", "line"],
+  "properties": {
+    "format": { "const": 1 },
+    "id": { "$ref": "common.defs.json#/$defs/id" },
+    "line": { "$ref": "common.defs.json#/$defs/text" },
+    "firstLaunch": { "$ref": "common.defs.json#/$defs/text" },
+    "needToKnow": { "type": "array", "items": { "$ref": "common.defs.json#/$defs/text" } },
+    "tutorial": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["title", "text"],
+        "properties": {
+          "title": { "$ref": "common.defs.json#/$defs/text" },
+          "text": { "$ref": "common.defs.json#/$defs/text" }
+        }
+      }
+    },
+    "knownIssues": { "$ref": "common.defs.json#/$defs/knownIssues" },
+    "owners": {
+      "type": "object",
+      "required": ["developer", "publisher"],
+      "properties": { "developer": { "$ref": "common.defs.json#/$defs/text" }, "publisher": { "$ref": "common.defs.json#/$defs/text" } }
+    },
+    "credits": { "$ref": "common.defs.json#/$defs/credits" },
+    "media": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["file", "kind", "alt"],
+        "properties": {
+          "file": { "$ref": "#/$defs/mediaPath" },
+          "kind": { "enum": ["image", "video"] },
+          "role": { "enum": ["hero", "turntable", "gallery", "hover"] },
+          "alt": { "$ref": "common.defs.json#/$defs/text" },
+          "poster": { "$ref": "#/$defs/mediaPath" },
+          "sources": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/mediaPath" } }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "mediaPath": {
+      "type": "string",
+      "description": "media/<file name>: no subfolders; a lower-case .jpg .jpeg .png .webp .webm or .mp4.",
+      "pattern": "^media/[^/\\\\:<>\"|?*\\x00-\\x1f]+\\.(jpg|jpeg|png|webp|webm|mp4)$"
+    }
+  }
+}

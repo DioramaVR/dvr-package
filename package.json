@@ -14,7 +14,8 @@
     "dvr-sign": "bin/dvr-sign.js",
     "dvr-licenses": "bin/dvr-licenses.js",
     "dvr-index": "bin/dvr-index.js",
-    "dvr-registry": "bin/dvr-registry.js"
+    "dvr-registry": "bin/dvr-registry.js",
+    "dvr-data": "bin/dvr-data.js"
   },
   "files": [
     "lib",

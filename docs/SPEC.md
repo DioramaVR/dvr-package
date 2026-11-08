@@ -15,6 +15,7 @@ disagree, this document wins and the schema is a bug.
 - [8. Reader behaviour](#8-reader-behaviour)
 - [9. Error codes](#9-error-codes)
 - [10. Changing the format](#10-changing-the-format)
+- [11. Game data zip (`<id>-data.zip`)](#11-game-data-zip-id-datazip)
 
 ## 1. Overview
 
@@ -23,10 +24,12 @@ registry.json            every game, its wave and status, where its index is,
   │                      installer versions, announcements          (signed)
   └─ <id>/index.json     one game: every public release with its zip URL,
        │                 SHA-256, maturity and receipt; known issues  (signed)
-       └─ <id>-<version>.zip
-            dvr-package.json  the manifest: what the zip holds, file hashes
-            dvr-package.sig   the manifest's signature
-            mod.json, payload/, ...
+       ├─ <id>-<version>.zip
+       │    dvr-package.json  the manifest: what the zip holds, file hashes
+       │    dvr-package.sig   the manifest's signature
+       │    mod.json, payload/, ...
+       └─ <id>-data.zip  the game's page: text, known issues, credits and
+                         media (section 11), checked against the index
 ```
 
 A reader starts from the registry URL it was built with, fetches a game's
@@ -204,7 +207,9 @@ One per game, served next to its signature.
   "knownIssues": [
     { "id": "pitch-reset", "title": "Pitch resets after loading a save",
       "text": "Plain text.", "severity": "annoying", "since": "1.0.0", "fixedIn": null }
-  ]
+  ],
+  "data": { "url": "https://example.org/data-1/fake-vr-data.zip", "sha256": "<SHA-256 of the zip>",
+            "size": 123456, "date": "2026-11-20" }
 }
 ```
 
@@ -221,6 +226,12 @@ One per game, served next to its signature.
   `blocking`; `since` and `fixedIn` are mod versions (`fixedIn` null or absent:
   still open). An issue applies to an installed version `v` when
   `since <= v` (or no `since`) and `v < fixedIn` (or no `fixedIn`).
+- **`data`** (optional): the game's data zip (section 11): `url`, `sha256`
+  (either case), `size` in bytes and `date`. The signed index covers it;
+  readers check the zip's size and SHA-256 against it. It isn't part of any
+  release: adding a release or promoting one keeps it as it was, and only a
+  new data zip changes it. Until installers read the data zip, `knownIssues`
+  here is kept equal to the zip's.
 
 ## 6. Registry (`registry.json`)
 
@@ -292,7 +303,7 @@ the game's build configuration, into the zip's `mod.json` and the index.
 ```json
 {
   "id": "fake-vr", "name": "Fake Game VR", "game": "Fake Game", "appid": 4242,
-  "tagline": "One line.", "description": "Plain text.",
+  "tagline": "One line.", "line": "One short line.", "description": "Plain text.",
   "requirements": ["Plain text."],
   "firstLaunch": "Plain text.",
   "needToKnow": ["Plain text."],
@@ -313,15 +324,26 @@ the game's build configuration, into the zip's `mod.json` and the index.
   "credits": [ { "name": "Some Library", "for": "What it does here", "license": "MIT",
                  "url": "https://example.org/", "support": [ { "label": "Sponsor", "url": "https://example.org/" } ],
                  "highlight": true } ],
-  "media": [ { "file": "media/hero.jpg", "kind": "image", "role": "hero", "alt": "Plain text." } ]
+  "media": [ { "file": "media/hero.jpg", "kind": "image", "role": "hero", "alt": "Plain text." },
+             { "file": "media/turntable.webm", "kind": "video", "role": "turntable", "alt": "Plain text.",
+               "poster": "media/turntable-poster.jpg", "sources": ["media/turntable.mp4"] } ]
 }
 ```
+
+- Required: `id`, `name`, `game`, `appid`, `tagline`, `firstLaunch`,
+  `tutorial`, `install`, `testedBuildIds`, `media`. `controls` and
+  `description` are optional (the data zip drops both); `controls`, when
+  present, has at least one entry.
+- `line` (optional): one short line for the game's card and the top of its
+  page, the data zip's `line`. Until it's written, `tagline` stands in.
 
 - A tutorial step's `controls` names entries of the top-level `controls` by
   `input`; an `{input, action}` object overrides the wording for that step.
   Every named input must exist in `controls`.
 - `media[].role`: `hero`, `turntable`, `gallery` or `hover`; an entry without
   a role is a gallery item. Consumers pick media by role, not by position.
+  `sources` (videos only): other encodings of the same video, such as an
+  MP4 for Safari.
 - `credits` (optional) lists parts specific to this game; project-wide credits
   live elsewhere. `owners` gives the trademark owners for the disclaimer line.
 
@@ -407,3 +429,82 @@ Writers also refuse to produce a release for these reasons:
   and says a newer installer is needed.
 - A spec change comes first; the schemas, writer, reader and fixtures follow in
   the same release of this package.
+
+## 11. Game data zip (`<id>-data.zip`)
+
+What a game's page shows (the website's and the installer's): its line, text,
+known issues, credits and media, in one zip per game, made from the game
+repo's `data/` folder (section 7) and published apart from the mod releases.
+Open-beta and stable games only for now: closed betas have no public index.
+
+```
+data.json
+media/<file names>
+```
+
+### `data.json`
+
+```json
+{
+  "format": 1,
+  "id": "fake-vr",
+  "line": "One short line (card + top of page).",
+  "firstLaunch": "Plain text.",
+  "needToKnow": ["Plain text."],
+  "tutorial": [ { "title": "Move the table", "text": "Reach out and grab it." } ],
+  "knownIssues": [ { "id": "pitch-reset", "title": "...", "text": "...", "severity": "annoying", "since": "1.0.0", "fixedIn": null } ],
+  "owners": { "developer": "Fake Studio", "publisher": "Fake Publisher" },
+  "credits": [ { "name": "Some Library", "for": "What it does here", "license": "MIT", "url": "https://example.org/" } ],
+  "media": [ { "file": "media/turntable.webm", "kind": "video", "role": "turntable", "alt": "Plain text.",
+               "poster": "media/turntable-poster.jpg", "sources": ["media/turntable.mp4"] } ]
+}
+```
+
+- Required: `format` (1), `id` (the index's `id`) and `line`; the rest is
+  optional. Text is plain text. `name`, `game` and `appid` aren't
+  repeated: the index has them.
+- `knownIssues` has the shape of section 5; `credits` entries the shape of
+  `credits.json` (section 7): the game's own "Built on" list. The project's
+  `credits.json` stays in the mod zip and the installer, never here.
+- `media[]`: `file`, `kind` (`image` or `video`) and `alt` required; `role`
+  as in section 7; `poster` (an image) and `sources` (other encodings of a
+  video) optional. A reader plays `file`, or the first of `sources` it can.
+  The type comes from the extension.
+- A writer takes these fields from `game.json` and `known-issues.json`
+  (`line` from `tagline` until it's written, with a warning) and nothing
+  else: `controls`, `tutorial[].controls`, `description`, `requirements`,
+  `install`, `settings`, `testedBuildIds` and `mediaGaps` stay in the game
+  repo.
+
+### Rules for the zip
+
+- It holds `data.json` and exactly the files its `media` names (`file`,
+  `poster`, `sources`), each once: nothing else (`extra-file`; folder
+  entries count), nothing missing (`missing-file`).
+- Paths follow section 3's rules (`unsafe-path`, including two names that
+  differ only in case). Media paths are `media/<file name>`: no subfolders.
+- Media types: `.jpg .jpeg .png .webp` (images, posters) and `.webm .mp4`
+  (videos, sources), lower case. A type that doesn't fit is `format`.
+- At most 64 MB, both the zip and its files unpacked (`format`).
+- `data.json` is canonical JSON (section 2). A malformed one, or one whose
+  `id` isn't the index's, is `format`; so is a newer `format`, which needs
+  a newer reader.
+- **Deterministic**: entries sorted by path and every timestamp
+  1980-01-01 00:00, never the day it's made, so the same `data/` folder
+  always gives the same bytes and SHA-256. (A publish that stopped part way
+  can tell, by the hash, whether its zip is already out.) The index's
+  `data.date` is separate.
+
+### Reading
+
+A reader checks the zip's size and SHA-256 against the index's `data`
+(`hash`) before anything else, then the entry names, then `data.json`, then
+the files; it reads the zip's own directory (no external unzip tool) and
+checks each entry's size and CRC-32 (`not-a-mod` when damaged). It extracts
+only after every check, into a new or empty folder.
+
+### Hosting
+
+A release on the game's public repository: tag `data-N` (N is the highest
+existing plus one), asset `<id>-data.zip`, not marked latest, not a
+pre-release. Earlier `data-N` releases are kept.

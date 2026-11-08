@@ -14,7 +14,7 @@ const SHA = 'a'.repeat(64);
 const source = { commit: 'a1b2c3d', coreRepo: 'example/core', coreCommit: 'e4f5a6b', coreFrom: 'tag v0.1.1', actionsCommit: 'c7d8e9f', builtAt: '2026-11-20T10:00:00Z' };
 
 test('every schema loads and uses only keywords the validator supports', () => {
-  assert.deepStrictEqual(s.names(), ['credits', 'game', 'index', 'known-issues', 'manifest', 'registry', 'release-entry']);
+  assert.deepStrictEqual(s.names(), ['credits', 'data', 'game', 'index', 'known-issues', 'manifest', 'registry', 'release-entry']);
   for (const n of s.names()) assert.doesNotThrow(() => s.load(n), n);
   for (const f of fs.readdirSync(path.join(__dirname, '..', 'schemas'))) {
     const text = fs.readFileSync(path.join(__dirname, '..', 'schemas', f), 'utf8');

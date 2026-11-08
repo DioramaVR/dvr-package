@@ -3,13 +3,14 @@
   "$id": "game.schema.json",
   "title": "data/game.json, one game's facts and text (docs/SPEC.md section 7). Cross-checks a schema can't express (tutorial inputs exist in controls, media files exist, one hero) are in lib/modjson.js checkGameData.",
   "type": "object",
-  "required": ["id", "name", "game", "appid", "tagline", "description", "firstLaunch", "controls", "tutorial", "install", "testedBuildIds", "media"],
+  "required": ["id", "name", "game", "appid", "tagline", "firstLaunch", "tutorial", "install", "testedBuildIds", "media"],
   "properties": {
     "id": { "$ref": "common.defs.json#/$defs/id" },
     "name": { "$ref": "common.defs.json#/$defs/text" },
     "game": { "$ref": "common.defs.json#/$defs/text" },
     "appid": { "$ref": "common.defs.json#/$defs/appid" },
     "tagline": { "$ref": "common.defs.json#/$defs/text" },
+    "line": { "$ref": "common.defs.json#/$defs/text", "description": "One short line for the card and the top of the page (the data zip's line; tagline stands in until it's written)." },
     "description": { "$ref": "common.defs.json#/$defs/text" },
     "requirements": { "type": "array", "items": { "$ref": "common.defs.json#/$defs/text" } },
     "firstLaunch": { "$ref": "common.defs.json#/$defs/text" },
@@ -109,7 +110,8 @@
           "kind": { "enum": ["image", "video"] },
           "role": { "enum": ["hero", "turntable", "gallery", "hover"] },
           "alt": { "$ref": "common.defs.json#/$defs/text" },
-          "poster": { "$ref": "#/$defs/dataPath" }
+          "poster": { "$ref": "#/$defs/dataPath" },
+          "sources": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/dataPath" }, "description": "Other encodings of the same video (an MP4 for Safari)." }
         }
       }
     },
