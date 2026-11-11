@@ -115,7 +115,7 @@ test('a folder mod: game.json install.folder becomes mod.json folder; the rules'
   assert.throws(() => mj.toModJson(g, build()), /only for loader type "folder"/);
   // Unsafe or unknown places are refused, by checkGameData and by toModJson.
   for (const bad of [{ target: 'documents', path: '../Mods' }, { target: 'documents', path: '/abs' }, { target: 'documents', path: 'C:/x' },
-    { target: 'documents', path: 'a\b' }, { target: 'documents', path: 'a//b' }, { target: 'documents', path: '' }, { target: 'home', path: 'x' },
+    { target: 'documents', path: 'a\\b' }, { target: 'documents', path: 'a\tb' }, { target: 'documents', path: 'a//b' }, { target: 'documents', path: '' }, { target: 'home', path: 'x' },
     { target: 'game', path: 'Mods/./x' }, { target: 'game', path: 'Mods/x.' }, { target: 'game', path: 'x', extra: 1 }]) {
     const gb = { ...g, install: { ...g.install, folder: bad } };
     assert.ok(mj.checkGameData(gb, issues).some((p) => p.startsWith('game.json/install/folder')), JSON.stringify(bad));
