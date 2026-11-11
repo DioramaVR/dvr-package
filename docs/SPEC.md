@@ -143,7 +143,7 @@ where each comes from:
 | Field | From |
 |---|---|
 | `id`, `name`, `game`, `appid`, `description` | `game.json` |
-| `exe`, `launchArgs`, `steamAppIdFile`, `loaderConfig` | `game.json` `install` |
+| `exe`, `launchArgs`, `steamAppIdFile`, `loaderConfig`, `folder` | `game.json` `install` |
 | `testedBuildIds`, `firstLaunch`, `needToKnow` | `game.json` |
 | `tutorial` | `game.json`, with each step's controls resolved to `[input, action]` pairs |
 | `sharedOptions`, `options` | `game.json` `settings.shared`, `settings.options` |
@@ -157,6 +157,29 @@ Nothing else goes into `mod.json`. The rest of a build configuration (project,
 archive, files to strip or copy...) is for building only, and a writer leaves
 it out. A field `game.json` owns may not also be set in the build
 configuration: a writer refuses that rather than pick one.
+
+#### The `folder` loader (since 0.1.5)
+
+For a game with its own mod support, which loads mods from a folder of its
+own (Timberborn: `Documents/Timberborn/Mods/<mod>`). There is no loader to
+download or configure: the installer copies the mod's folder to where
+`game.json` says. One general type, so the next such game needs only data.
+
+- `loader`: `{ "type": "folder", "version": "1" }` (`version` is this
+  type's version), with no `url`, `sha256` or `loaderConfig`.
+- `folder` (from `game.json` `install.folder`): `{ "target", "path" }`.
+  `target` is `documents` (the player's Documents folder: the shell's known
+  folder, wherever it has been moved) or `game` (the game's install folder).
+  `path` is relative to it: forward slashes, at most 200 characters, no empty,
+  `.` or `..` part, no part ending in a space or a dot, and none of
+  `< > : " \ | ? *`. Only a folder mod has `folder`, and a folder mod must have it.
+- `plugin.folder` names the mod's folder in the payload (`TimberbornVr`).
+  Payload `<plugin.folder>/X` installs to `<target>/<path>/X`, and every
+  other payload path P (such as `licenses/...`) to `<target>/<path>/P`:
+  nothing goes outside `<target>/<path>`. `plugin.config` maps the same way.
+
+A writer and a reader refuse a `folder` that breaks these rules
+(`unsafe-path`), so a package can never name a place outside its folder.
 
 ## 4. Signatures
 
@@ -353,6 +376,9 @@ the game's build configuration, into the zip's `mod.json` and the index.
   a role is a gallery item. Consumers pick media by role, not by position.
   `sources` (videos only): other encodings of the same video, such as an
   MP4 for Safari.
+- `install.folder` (optional, since 0.1.5): where a `folder`-loader mod goes,
+  `{ "target": "documents" | "game", "path": "Timberborn/Mods/TimberbornVr" }`
+  (section 3). Only for a folder mod, which then has no `loaderConfig`.
 - `credits` (optional) lists parts specific to this game; project-wide credits
   live elsewhere. `owners` gives the trademark owners for the disclaimer line.
 
@@ -401,7 +427,8 @@ To install a downloaded zip, a reader:
 4. reads `dvr-package.json`, checks `format`, fields and `minAppVersion`;
 5. verifies `dvr-package.sig` against its trusted keys;
 6. checks `files` against what's present, and every hash;
-7. checks `mod.json` agrees on `id`, `appid` and loader type;
+7. checks `mod.json` agrees on `id`, `appid` and loader type, and that a
+   `folder` loader's `folder` is safe (section 3);
 8. only then moves the folder into place.
 
 A failure at any step leaves nothing behind. A zip loaded from a file skips

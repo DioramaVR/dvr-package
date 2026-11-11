@@ -60,6 +60,7 @@
         "exe": { "$ref": "common.defs.json#/$defs/text" },
         "launchArgs": { "type": "string" },
         "steamAppIdFile": { "type": "boolean" },
+        "folder": { "$ref": "common.defs.json#/$defs/folder" },
         "loaderConfig": { "type": "object", "additionalProperties": { "type": "object" } }
       }
     },

@@ -94,3 +94,32 @@ test('no hover video, no video field', () => {
   assert.ok(!('video' in mod));
   assert.deepStrictEqual(mj.namedFiles(mod), []);
 });
+
+test('a folder mod: game.json install.folder becomes mod.json folder; the rules', () => {
+  const { game, issues } = fresh();
+  const folder = { target: 'documents', path: 'Fake Game/Mods/FakeVr' };
+  const g = { ...game, install: { exe: 'FakeGame.exe', launchArgs: '-x', folder } };
+  const b = { loader: { type: 'folder', version: '1' }, plugin: { folder: 'FakeVr', config: 'FakeVr/vr-menu.cfg' } };
+  assert.deepStrictEqual(mj.checkGameData(g, issues), []);
+  const mod = mj.toModJson(g, b);
+  assert.deepStrictEqual(mod.folder, folder);
+  assert.deepStrictEqual(mod.loader, { type: 'folder', version: '1' });
+  assert.ok(!('loaderConfig' in mod));
+  // build.json can't say where: game.json owns it.
+  assert.throws(() => mj.toModJson(g, { ...b, folder }), /sets folder, which game.json owns/);
+  // A folder build needs install.folder, and nothing to download or configure.
+  assert.throws(() => mj.toModJson(game, b), /needs game\.json install\.folder/);
+  assert.throws(() => mj.toModJson(g, { ...b, loader: { type: 'folder', version: '1', url: 'https://example.org/x.zip' } }), /nothing to download/);
+  assert.throws(() => mj.toModJson({ ...g, install: { ...g.install, loaderConfig: { A: { b: 1 } } } }, b), /no loader to configure/);
+  // install.folder with another loader is a mistake.
+  assert.throws(() => mj.toModJson(g, build()), /only for loader type "folder"/);
+  // Unsafe or unknown places are refused, by checkGameData and by toModJson.
+  for (const bad of [{ target: 'documents', path: '../Mods' }, { target: 'documents', path: '/abs' }, { target: 'documents', path: 'C:/x' },
+    { target: 'documents', path: 'a\b' }, { target: 'documents', path: 'a//b' }, { target: 'documents', path: '' }, { target: 'home', path: 'x' },
+    { target: 'game', path: 'Mods/./x' }, { target: 'game', path: 'Mods/x.' }, { target: 'game', path: 'x', extra: 1 }]) {
+    const gb = { ...g, install: { ...g.install, folder: bad } };
+    assert.ok(mj.checkGameData(gb, issues).some((p) => p.startsWith('game.json/install/folder')), JSON.stringify(bad));
+    assert.throws(() => mj.toModJson(gb, b), /install\.folder/, JSON.stringify(bad));
+  }
+  assert.strictEqual(require('../lib/folder').folderProblem({ target: 'game', path: 'Mods/Fake VR' }), null);
+});
