@@ -131,11 +131,19 @@ test('game.json: controls and description are optional now; the rest that was re
   assert.ok(!('controls' in g) && !('description' in g), 'the fixture has neither');
   assert.deepStrictEqual(mj.checkGameData(g, [], { dataDir: d }), []);
   const fake = JSON.parse(fs.readFileSync(path.join(FAKE, 'game.json'), 'utf8'));
-  const required = ['id', 'name', 'game', 'appid', 'tagline', 'firstLaunch', 'tutorial', 'install', 'testedBuildIds', 'media'];
+  const required = ['id', 'name', 'game', 'appid', 'firstLaunch', 'tutorial', 'install', 'testedBuildIds'];
   for (const k of required) {
     const { [k]: _, ...less } = fake;
     assert.ok(validate(less, 'game').some((p) => p.message === `needs "${k}"`), k);
   }
+  // 0.1.4: media (the assets repo has the pictures) and tagline (line is preferred) are optional,
+  // but a game needs one of line or tagline, and a media list that's there still needs its hero.
+  const { media, tagline, ...lean } = fake;
+  assert.deepStrictEqual(validate({ ...lean, line: 'One line.' }, 'game'), [], 'line alone, no media');
+  assert.ok(validate({ ...lean, line: undefined }, 'game').length, 'neither line nor tagline');
+  assert.deepStrictEqual(mj.checkGameData({ ...g, media: [] }, [], { dataDir: d }), [], 'an empty media list');
+  const noHero = [{ file: 'media/x.jpg', kind: 'image', role: 'gallery', alt: 'A picture.' }];
+  assert.ok(mj.checkGameData({ ...g, media: noHero }, []).some((p) => /no hero image/.test(p.message || p)), 'a media list without a hero still fails');
   const { controls, description, ...less } = fake;
   assert.deepStrictEqual(validate(less, 'game'), []);
   assert.ok(validate({ ...fake, controls: [] }, 'game').length, 'controls, when there, still needs an entry');
