@@ -336,12 +336,15 @@ the game's build configuration, into the zip's `mod.json` and the index.
 }
 ```
 
-- Required: `id`, `name`, `game`, `appid`, `tagline`, `firstLaunch`,
-  `tutorial`, `install`, `testedBuildIds`, `media`. `controls` and
+- Required: `id`, `name`, `game`, `appid`, `firstLaunch`, `tutorial`,
+  `install`, `testedBuildIds`, and one of `line` or `tagline`. `media` is
+  optional (since 0.1.4: pictures and video come from the assets repo, section
+  12); when it lists anything, it has exactly one hero. `controls` and
   `description` are optional (the data zip drops both); `controls`, when
   present, has at least one entry.
-- `line` (optional): one short line for the game's card and the top of its
-  page, the data zip's `line`. Until it's written, `tagline` stands in.
+- `line`: one short line for the game's card and the top of its page, the
+  data zip's `line` and the index's `description`. `tagline` (optional, older)
+  stands in only where `line` isn't written.
 
 - A tutorial step's `controls` names entries of the top-level `controls` by
   `input`; an `{input, action}` object overrides the wording for that step.
