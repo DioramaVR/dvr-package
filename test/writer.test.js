@@ -256,7 +256,7 @@ test('the public index: exports load lazily; w2 parts may be missing on this bra
   assert.strictEqual(api.FORMAT, 1);
   for (const k of ['reader', 'writer', 'sign', 'licenses', 'privacy', 'version', 'zip', 'errors', 'dataZip']) assert.ok(api[k], k);
   assert.strictEqual(api.PackageError, require('../lib/errors').PackageError);
-  assert.deepStrictEqual(Object.keys(api).sort(), ['FORMAT', 'PackageError', 'dataZip', 'errors', 'gameAssets', 'index', 'licenses', 'modJson', 'privacy', 'reader', 'registry', 'schemas', 'sign', 'version', 'writer', 'zip']);
+  assert.deepStrictEqual(Object.keys(api).sort(), ['FORMAT', 'PackageError', 'dataZip', 'errors', 'folder', 'gameAssets', 'index', 'licenses', 'modJson', 'privacy', 'reader', 'registry', 'schemas', 'sign', 'version', 'writer', 'zip']);
 });
 
 test('credits: a copy of credits.json at the zip root, hashed and signed; a bad one is refused', () => {
@@ -270,4 +270,24 @@ test('credits: a copy of credits.json at the zip root, hashed and signed; a bad 
   const bad = path.join(tmp, 'bad-credits.json');
   fs.writeFileSync(bad, JSON.stringify({ format: 1, credits: [{ name: 'x' }] }) + '\n');
   assert.throws(() => packRelease(dir, 'credits-bad', { credits: bad }), (e) => e.code === 'format' && /credits.json/.test(e.message));
+});
+
+test('a folder mod packs and reads; an unsafe or missing folder is refused (unsafe-path)', () => {
+  const folderMod = (folder) => ({ ...f.MOD_JSON, loader: { type: 'folder', version: '1' }, plugin: { folder: 'FakeVr', config: 'FakeVr/vr-menu.cfg' }, ...(folder === undefined ? {} : { folder }) });
+  const make = (name, folder) => f.makeMod(path.join(tmp, name), {
+    mod: folderMod(folder),
+    info: { ...f.RELEASE_INFO, loader: { type: 'folder', version: '1' } },
+    change: (dir) => {
+      fs.rmSync(path.join(dir, 'payload'), { recursive: true, force: true });
+      fs.mkdirSync(path.join(dir, 'payload', 'FakeVr'), { recursive: true });
+      fs.writeFileSync(path.join(dir, 'payload', 'FakeVr', 'FakeVr.dll'), 'fake plugin\n');
+      fs.mkdirSync(path.join(dir, 'payload', 'licenses'), { recursive: true });
+      fs.writeFileSync(path.join(dir, 'payload', 'licenses', 'README.txt'), 'Licences (test data)\n');
+    },
+  });
+  const ok = packRelease(make('folder-ok', { target: 'documents', path: 'Fake Game/Mods/FakeVr' }), 'folder-ok');
+  assert.strictEqual(reader.checkZip(ok.zip, f.READER_OPTS).manifest.loader.type, 'folder');
+  for (const [i, folder] of [{ target: 'documents', path: '../../Windows' }, { target: 'nowhere', path: 'x' }, undefined].entries()) {
+    assert.throws(() => packRelease(make(`folder-bad${i}`, folder), `folder-bad${i}`), (e) => e.code === 'unsafe-path', `case ${i}`);
+  }
 });

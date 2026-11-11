@@ -17,6 +17,16 @@
     "listedMaturity": { "enum": ["open-beta", "stable"] },
     "status": { "enum": ["stable", "open-beta", "coming"] },
     "commit": { "type": "string", "pattern": "^[0-9a-f]{7,40}$" },
+    "folder": {
+      "type": "object",
+      "description": "Where a folder-loader mod goes (SPEC section 3): a base folder the installer knows, and a relative path in it.",
+      "required": ["target", "path"],
+      "additionalProperties": false,
+      "properties": {
+        "target": { "enum": ["documents", "game"] },
+        "path": { "type": "string", "minLength": 1, "maxLength": 200, "description": "Relative, forward slashes, no empty, . or .. part (lib/folder.js folderProblem has every rule)" }
+      }
+    },
     "loader": {
       "type": "object",
       "required": ["type", "version"],
