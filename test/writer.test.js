@@ -256,7 +256,7 @@ test('the public index: exports load lazily; w2 parts may be missing on this bra
   assert.strictEqual(api.FORMAT, 1);
   for (const k of ['reader', 'writer', 'sign', 'licenses', 'privacy', 'version', 'zip', 'errors', 'dataZip']) assert.ok(api[k], k);
   assert.strictEqual(api.PackageError, require('../lib/errors').PackageError);
-  assert.deepStrictEqual(Object.keys(api).sort(), ['FORMAT', 'PackageError', 'dataZip', 'errors', 'folder', 'gameAssets', 'index', 'licenses', 'modJson', 'privacy', 'reader', 'registry', 'schemas', 'sign', 'version', 'writer', 'zip']);
+  assert.deepStrictEqual(Object.keys(api).sort(), ['FORMAT', 'PackageError', 'dataZip', 'errors', 'folder', 'gameAssets', 'index', 'licenses', 'modJson', 'privacy', 'reader', 'registry', 'schemas', 'sign', 'version', 'vrLaunch', 'writer', 'zip']);
 });
 
 test('credits: a copy of credits.json at the zip root, hashed and signed; a bad one is refused', () => {
@@ -289,5 +289,15 @@ test('a folder mod packs and reads; an unsafe or missing folder is refused (unsa
   assert.strictEqual(reader.checkZip(ok.zip, f.READER_OPTS).manifest.loader.type, 'folder');
   for (const [i, folder] of [{ target: 'documents', path: '../../Windows' }, { target: 'nowhere', path: 'x' }, undefined].entries()) {
     assert.throws(() => packRelease(make(`folder-bad${i}`, folder), `folder-bad${i}`), (e) => e.code === 'unsafe-path', `case ${i}`);
+  }
+});
+
+test('vrLaunch: a mod with one packs and reads; a bad one, or one on a uevr mod, is refused (format)', () => {
+  const make = (name, mod) => f.makeMod(path.join(tmp, name), { mod: { ...f.MOD_JSON, ...mod } });
+  const ok = packRelease(make('vr-ok', { vrLaunch: { args: '-dvr-vr' } }), 'vr-ok');
+  assert.ok(reader.checkZip(ok.zip, f.READER_OPTS).manifest);
+  for (const [i, mod] of [{ vrLaunch: { args: '' } }, { vrLaunch: { args: '-a\n-b' } }, { vrLaunch: { args: '-dvr-vr', exe: 'x.exe' } }, { vrLaunch: '-dvr-vr' },
+    { vrLaunch: { args: '-dvr-vr' }, loader: { type: 'uevr', version: '1' } }].entries()) {
+    assert.throws(() => packRelease(make(`vr-bad${i}`, mod), `vr-bad${i}`), (e) => e.code === 'format' && /vrLaunch/.test(e.message), `case ${i}`);
   }
 });
