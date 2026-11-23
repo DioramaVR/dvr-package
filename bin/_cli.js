@@ -19,16 +19,22 @@ function parse(argv, valued, flags, usage) {
   return o;
 }
 
+// stderr, written at once: process.exit() can drop console.error's output
+// on a Windows pipe.
+function err(msg) {
+  fs.writeSync(2, `${msg}\n`);
+}
+
 function die(code, msg) {
-  console.error(msg);
+  err(msg);
   process.exit(code);
 }
 
 // A refusal: a PackageError prints its code and every detail.
 function refuse(e) {
   if (e && e.code && e.name === 'PackageError') {
-    console.error(`${e.code}: ${e.message}`);
-    for (const d of e.details || []) if (!e.message.includes(d)) console.error(`  ${d}`);
+    err(`${e.code}: ${e.message}`);
+    for (const d of e.details || []) if (!e.message.includes(d)) err(`  ${d}`);
     process.exit(1);
   }
   die(1, `error: ${e && e.message ? e.message : e}`);
@@ -37,4 +43,4 @@ function refuse(e) {
 // --trusted-keys FILE (tests, key rotation checks): the list from that file.
 const trustedFrom = (file) => (file ? JSON.parse(fs.readFileSync(file, 'utf8')) : undefined);
 
-module.exports = { parse, die, refuse, trustedFrom };
+module.exports = { parse, err, die, refuse, trustedFrom };

@@ -13,7 +13,7 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
-const { parse, die, refuse } = require('./_cli');
+const { parse, err, die, refuse } = require('./_cli');
 const gameAssets = require('../lib/game-assets');
 
 const usage = fs.readFileSync(__filename, 'utf8').split('\n').filter((l) => /^\/\/ {3}dvr-assets/.test(l)).map((l) => l.slice(3)).join('\n');
@@ -24,7 +24,7 @@ try {
   if (cmd === 'check') {
     if (o._.length !== 1 || Object.keys(o).length !== 1) die(2, usage);
     const r = gameAssets.check(o._[0]);
-    for (const p of r.problems) console.error(`${p.code}: ${p.path}: ${p.message}`);
+    for (const p of r.problems) err(`${p.code}: ${p.path}: ${p.message}`);
     if (r.problems.length) die(1, `dvr-assets: ${r.id || o._[0]}: ${r.problems.length} problem(s)`);
     const bytes = r.files.reduce((n, f) => n + f.size, 0);
     console.log(`dvr-assets: ${r.id}: fine (${r.media.length} media, ${r.files.length} file(s), ${bytes} bytes)`);

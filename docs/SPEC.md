@@ -475,7 +475,7 @@ verdict for a given file:
 Writers also refuse to produce a release for these reasons:
 `not-release-build`, `core-not-tagged`, `no-licences`, `unity-files`,
 `private-path` (a payload containing the build machine's home-folder path),
-`metadata` (a picture carrying Exif, XMP, IPTC or PNG text metadata; section 12).
+`metadata` (a picture carrying Exif, XMP, IPTC, a comment or PNG text metadata; section 12).
 
 ## 10. Changing the format
 
@@ -607,9 +607,10 @@ signed index. They come from the assets repo, one folder per game:
 ### Metadata
 
 Pictures are published byte for byte as committed, so a writer **flags**
-metadata and never strips it (`metadata`): in a JPG, APP1 (Exif, XMP) and
-APP13 (IPTC) segments; in a PNG, `tEXt`, `zTXt`, `iTXt`, `eXIf` and
-`tIME` chunks. The fix is to strip the file and commit it again.
+metadata and never strips it (`metadata`): in a JPG, APP1 (Exif, XMP),
+APP13 (IPTC) and COM (comment) segments; in a PNG, `tEXt`, `zTXt`,
+`iTXt`, `eXIf` and `tIME` chunks; in a WebP, `EXIF` and `XMP `
+chunks. The fix is to strip the file and commit it again.
 
 ### In the index
 

@@ -69,7 +69,7 @@ test('check: a clean folder; every file with its size and lower-case SHA-256', (
   }
 });
 
-test('check flags metadata, never strips it: JPG Exif, XMP, IPTC; PNG tEXt, zTXt, iTXt, eXIf, tIME', () => {
+test('check flags metadata, never strips it: JPG Exif, XMP, IPTC, COM; PNG tEXt, zTXt, iTXt, eXIf, tIME; WebP EXIF, XMP', () => {
   const before = fs.readFileSync(media(FLAGGED, 'hero.jpg'));
   const r = ga.check(FLAGGED);
   assert.deepStrictEqual(r.problems.map((p) => p.message), [
@@ -79,17 +79,26 @@ test('check flags metadata, never strips it: JPG Exif, XMP, IPTC; PNG tEXt, zTXt
   assert.ok(fs.readFileSync(media(FLAGGED, 'hero.jpg')).equals(before), 'the file is untouched');
   assert.deepStrictEqual(ga.jpgMetadata(fx.jpg({ xmp: true })), ['JPG APP1 XMP']);
   assert.deepStrictEqual(ga.jpgMetadata(fx.jpg({ iptc: true })), ['JPG APP13 IPTC (Photoshop)']);
-  assert.deepStrictEqual(ga.jpgMetadata(fx.jpg({ exif: true, xmp: true, iptc: true })), ['JPG APP1 Exif', 'JPG APP1 XMP', 'JPG APP13 IPTC (Photoshop)']);
+  assert.deepStrictEqual(ga.jpgMetadata(fx.jpg({ com: true })), ['JPG COM (comment)'], 'never the comment text');
+  assert.deepStrictEqual(ga.jpgMetadata(fx.jpg({ exif: true, xmp: true, iptc: true, com: true })), ['JPG APP1 Exif', 'JPG APP1 XMP', 'JPG APP13 IPTC (Photoshop)', 'JPG COM (comment)']);
   assert.deepStrictEqual(ga.jpgMetadata(fx.jpg()), [], 'APP0 (JFIF) is fine');
   const chunks = [['zTXt', Buffer.from('Title\0\0x')], ['iTXt', Buffer.from('Author\0\0\0\0\0x')], ['eXIf', Buffer.from('MM\0*')], ['tIME', Buffer.from([7, 234, 11, 8, 12, 0, 0])]];
   assert.deepStrictEqual(ga.pngMetadata(fx.png(undefined, chunks)), ['PNG zTXt "Title"', 'PNG iTXt "Author"', 'PNG eXIf', 'PNG tIME']);
   assert.deepStrictEqual(ga.pngMetadata(fx.png(undefined, [['gAMA', Buffer.from([0, 0, 0xb1, 0x8f])]])), [], 'other chunks are fine');
+  const webpChunks = [['VP8X', Buffer.alloc(10)], ['ICCP', Buffer.alloc(3)], ['EXIF', Buffer.from('MM\0*')], ['VP8L', Buffer.alloc(5)], ['XMP ', Buffer.from('<x:xmpmeta/>')]];
+  assert.deepStrictEqual(ga.webpMetadata(fx.webp(webpChunks)), ['WebP EXIF', 'WebP XMP'], 'odd-sized chunks are padded');
+  assert.deepStrictEqual(ga.webpMetadata(fx.webp()), [], 'VP8X alone is fine');
   // Every flagged kind, through check().
-  const dir = game((d) => {
-    fs.writeFileSync(media(d, 'hero.jpg'), fx.jpg({ xmp: true, iptc: true }));
+  const dir = game((d, doc) => {
+    fs.writeFileSync(media(d, 'hero.jpg'), fx.jpg({ xmp: true, iptc: true, com: true }));
     fs.writeFileSync(media(d, 'turntable-poster.png'), fx.png(undefined, chunks));
+    fs.rmSync(media(d, 'gallery-1.png'));
+    fs.writeFileSync(media(d, 'gallery-1.webp'), fx.webp(webpChunks));
+    doc.media[2].file = 'gallery-1.webp';
   });
-  assert.strictEqual(ga.check(dir).problems.filter((p) => p.code === 'metadata').length, 6);
+  const metadata = ga.check(dir).problems.filter((p) => p.code === 'metadata');
+  assert.strictEqual(metadata.length, 9);
+  assert.deepStrictEqual(metadata.slice(-2).map((p) => p.path), ['media/gallery-1.webp', 'media/gallery-1.webp']);
 });
 
 test('check reports every other problem: names, files, types, sizes, the media rules', () => {
