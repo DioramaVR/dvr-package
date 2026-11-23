@@ -125,6 +125,35 @@ test('pack refuses a bad source: missing, unsafe, subfolder, wrong type, too big
   refuse((d) => fs.rmSync(path.join(d, 'game.json')), 'format', 'no game.json');
 });
 
+test('pack refuses picture metadata (section 12\'s check), listing every piece; reading doesn\'t check it', () => {
+  const fx = require('./fixtures/make-assets-fixtures');
+  const d = copySource();
+  fs.writeFileSync(path.join(d, 'media', 'turntable-poster.jpg'), fx.jpg({ com: true }));
+  fs.writeFileSync(path.join(d, 'media', 'gallery-1.png'), fx.png(undefined, [fx.tEXt('Comment', 'Made up for a test.')]));
+  fs.writeFileSync(path.join(d, 'media', 'unused.webp'), fx.webp([['VP8X', Buffer.alloc(10)], ['EXIF', Buffer.from('MM')]])); // not packed: not checked
+  const out = dir('out');
+  let err;
+  try { dataZip.pack(d, out); } catch (e) { err = e; }
+  assert.strictEqual(err?.code, 'metadata');
+  assert.deepStrictEqual([...err.details].sort(), [
+    'data/media/gallery-1.png: has PNG tEXt "Comment" metadata: strip it and commit the file again',
+    'data/media/turntable-poster.jpg: has JPG COM (comment) metadata: strip it and commit the file again',
+  ]);
+  assert.ok(!err.message.includes('Made up'), 'never the metadata itself');
+  assert.ok(!fs.existsSync(out) || fs.readdirSync(out).length === 0, 'no zip');
+  assert.strictEqual(code(() => dataZip.checkSource(d)), 'metadata');
+  const src = cli(['dvr-data.js', 'check-source', d]);
+  assert.strictEqual(src.status, 1);
+  assert.match(src.stderr, /^metadata: /);
+  assert.match(src.stderr, /^ {2}data\/media\/gallery-1\.png: has PNG tEXt "Comment" metadata/m);
+  // A zip that already has it (published before the check) still reads.
+  const oldDir = dir('old');
+  fs.mkdirSync(oldDir);
+  const old = path.join(oldDir, 'fake-vr-data.zip');
+  rewrap(path.join(FIX, 'good.zip'), old, (e) => e.set('media/turntable-poster.jpg', fx.jpg({ com: true })));
+  assert.strictEqual(code(() => dataZip.read(old)), 'ok');
+});
+
 test('game.json: controls and description are optional now; the rest that was required still is', () => {
   const d = copySource();
   const g = JSON.parse(fs.readFileSync(path.join(d, 'game.json'), 'utf8'));

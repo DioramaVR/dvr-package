@@ -475,7 +475,7 @@ verdict for a given file:
 Writers also refuse to produce a release for these reasons:
 `not-release-build`, `core-not-tagged`, `no-licences`, `unity-files`,
 `private-path` (a payload containing the build machine's home-folder path),
-`metadata` (a picture carrying Exif, XMP, IPTC, a comment or PNG text metadata; section 12).
+`metadata` (a picture carrying Exif, XMP, IPTC, a comment or PNG text metadata; sections 11 and 12).
 
 ## 10. Changing the format
 
@@ -543,6 +543,8 @@ media/<file names>
 - Media types: `.jpg .jpeg .png .webp` (images, posters) and `.webm .mp4`
   (videos, sources), lower case. A type that doesn't fit is `format`.
 - At most 64 MB, both the zip and its files unpacked (`format`).
+- No picture metadata (`metadata`), by section 12's rule: a writer refuses
+  to pack a picture carrying it, and never strips it. Readers don't check it.
 - `data.json` is canonical JSON (section 2). A malformed one, or one whose
   `id` isn't the index's, is `format`; so is a newer `format`, which needs
   a newer reader.
