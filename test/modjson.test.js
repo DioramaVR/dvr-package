@@ -123,3 +123,20 @@ test('a folder mod: game.json install.folder becomes mod.json folder; the rules'
   }
   assert.strictEqual(require('../lib/folder').folderProblem({ target: 'game', path: 'Mods/Fake VR' }), null);
 });
+
+test('vrLaunch: game.json install.vrLaunch becomes mod.json vrLaunch; the rules', () => {
+  const { game, issues } = fresh();
+  const g = { ...game, install: { ...game.install, vrLaunch: { args: '-dvr-vr' } } };
+  assert.deepStrictEqual(mj.checkGameData(g, issues, { dataDir }), []);
+  const mod = mj.toModJson(g, build());
+  assert.deepStrictEqual(mod.vrLaunch, { args: '-dvr-vr' });
+  assert.ok(!('vrLaunch' in mj.toModJson(game, build())), 'optional');
+  assert.throws(() => mj.toModJson(g, { ...build(), vrLaunch: { args: '-x' } }), /sets vrLaunch, which game.json owns/);
+  const uevrBuild = { loader: { type: 'uevr', version: '1.0', url: 'https://example.org/u.zip', sha256: 'A'.repeat(64) }, uevr: { profile: 'P', process: 'P' }, plugin: { folder: 'DioramaVR/fake-vr' } };
+  assert.throws(() => mj.toModJson(g, uevrBuild), /not for a uevr mod/);
+  for (const bad of [{ args: '' }, { args: ' -dvr-vr' }, { args: 'a\tb' }, { args: 'x'.repeat(301) }, { args: '-dvr-vr', more: 1 }, { args: 1 }]) {
+    const gb = { ...game, install: { ...game.install, vrLaunch: bad } };
+    assert.ok(mj.checkGameData(gb, issues).some((p) => p.startsWith('game.json/install/vrLaunch')), JSON.stringify(bad));
+    assert.throws(() => mj.toModJson(gb, build()), /install\.vrLaunch/, JSON.stringify(bad));
+  }
+});

@@ -143,7 +143,7 @@ where each comes from:
 | Field | From |
 |---|---|
 | `id`, `name`, `game`, `appid`, `description` | `game.json` |
-| `exe`, `launchArgs`, `steamAppIdFile`, `loaderConfig`, `folder` | `game.json` `install` |
+| `exe`, `launchArgs`, `steamAppIdFile`, `loaderConfig`, `folder`, `vrLaunch` | `game.json` `install` |
 | `testedBuildIds`, `firstLaunch`, `needToKnow` | `game.json` |
 | `tutorial` | `game.json`, with each step's controls resolved to `[input, action]` pairs |
 | `sharedOptions`, `options` | `game.json` `settings.shared`, `settings.options` |
@@ -180,6 +180,24 @@ download or configure: the installer copies the mod's folder to where
 
 A writer and a reader refuse a `folder` that breaks these rules
 (`unsafe-path`), so a package can never name a place outside its folder.
+
+#### `vrLaunch`: a "Play in VR" Steam launch option (since 0.1.6)
+
+Optional. A standalone headset such as the Steam Frame starts a PC game from
+its library with one of the game's Steam launch options; `vrLaunch` asks the
+installer to add one that starts the mod in VR.
+
+- `vrLaunch` (from `game.json` `install.vrLaunch`): `{ "args": "-dvr-vr" }`.
+  The option runs `exe` with `launchArgs` and then `args`
+  (`-force-d3d11 -dvr-vr` for a game whose `launchArgs` is `-force-d3d11`).
+  `args`: 1 to 300 characters, no control characters, no leading or trailing
+  space. The game's flat option keeps its own arguments.
+- Not for `uevr` mods: UEVR attaches from its own launcher.
+- Where the option goes in Steam's data and what it's called are the
+  installer's, not the package's.
+
+A writer refuses a `vrLaunch` that breaks these rules and a reader refuses
+such a package (`format`).
 
 ## 4. Signatures
 
@@ -379,6 +397,8 @@ the game's build configuration, into the zip's `mod.json` and the index.
 - `install.folder` (optional, since 0.1.5): where a `folder`-loader mod goes,
   `{ "target": "documents" | "game", "path": "Timberborn/Mods/TimberbornVr" }`
   (section 3). Only for a folder mod, which then has no `loaderConfig`.
+- `install.vrLaunch` (optional, since 0.1.6): `{ "args": "-dvr-vr" }`, a
+  "Play in VR" Steam launch option (section 3). Not for a `uevr` mod.
 - `credits` (optional) lists parts specific to this game; project-wide credits
   live elsewhere. `owners` gives the trademark owners for the disclaimer line.
 
