@@ -11,13 +11,13 @@
 // Exit codes: 0 fine, 1 refused ("<code>: <message>"), 2 usage.
 'use strict';
 const fs = require('fs');
-const { parse, die, refuse } = require('./_cli');
+const { parse, err, die, refuse } = require('./_cli');
 const dataZip = require('../lib/datazip');
 
 const usage = fs.readFileSync(__filename, 'utf8').split('\n').filter((l) => /^\/\/ {3}dvr-data/.test(l)).map((l) => l.slice(3)).join('\n');
 const [cmd, ...rest] = process.argv.slice(2);
 const o = parse(rest, ['--date', '--sha256', '--size', '--id'], [], usage);
-const warn = (ws) => { for (const w of ws) console.error(`dvr-data: warning: ${w}`); };
+const warn = (ws) => { for (const w of ws) err(`dvr-data: warning: ${w}`); };
 const only = (allowed) => { for (const k of ['date', 'sha256', 'size', 'id']) if (k in o && !allowed.includes(k)) die(2, `${cmd} doesn't take --${k}\n${usage}`); };
 
 try {
