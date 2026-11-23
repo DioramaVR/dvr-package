@@ -61,6 +61,12 @@
         "launchArgs": { "type": "string" },
         "steamAppIdFile": { "type": "boolean" },
         "folder": { "$ref": "common.defs.json#/$defs/folder" },
+        "vrLaunch": {
+          "type": "object",
+          "required": ["args"],
+          "additionalProperties": false,
+          "properties": { "args": { "type": "string", "minLength": 1, "maxLength": 300 } }
+        },
         "loaderConfig": { "type": "object", "additionalProperties": { "type": "object" } }
       }
     },
