@@ -19,7 +19,7 @@ const u32 = (n) => { const b = Buffer.alloc(4); b.writeUInt32BE(n >>> 0); return
 const segment = (marker, body) => Buffer.concat([Buffer.from([0xff, marker]), u16(body.length + 2), body]);
 
 // An 8x8 mid-grey baseline JPG: one block, DC 0, AC end-of-block, with
-// one-code Huffman tables. extra: { exif, xmp, iptc } adds that segment.
+// one-code Huffman tables. extra: { exif, xmp, iptc, com } adds that segment.
 function jpg(extra = {}) {
   const huff = (cls) => Buffer.concat([Buffer.from([cls]), Buffer.from([0, 1, ...Array(14).fill(0)]), Buffer.from([0])]);
   const parts = [
@@ -32,6 +32,7 @@ function jpg(extra = {}) {
   }
   if (extra.xmp) parts.push(segment(0xe1, Buffer.from('http://ns.adobe.com/xap/1.0/\0<x:xmpmeta/>', 'latin1')));
   if (extra.iptc) parts.push(segment(0xed, Buffer.from('Photoshop 3.0\0' + '8BIM\x04\x04\0\0\0\0\0\0', 'latin1')));
+  if (extra.com) parts.push(segment(0xfe, Buffer.from('Made up for a test.', 'latin1')));
   parts.push(
     segment(0xdb, Buffer.concat([Buffer.from([0]), Buffer.alloc(64, 1)])),
     segment(0xc0, Buffer.from([8, 0, 8, 0, 8, 1, 1, 0x11, 0])),
@@ -64,6 +65,17 @@ function png(rgb = [0x18, 0x1a, 0x25], chunks = []) {
   ]);
 }
 const tEXt = (keyword, text) => ['tEXt', Buffer.from(`${keyword}\0${text}`, 'latin1')];
+
+// A WebP container stub (it doesn't decode): RIFF, "WEBP", then chunks, each
+// [id, Buffer], padded to an even length. With none, one empty VP8X.
+function webp(chunks = [['VP8X', Buffer.alloc(10)]]) {
+  const body = Buffer.concat(chunks.map(([id, d]) => {
+    const size = Buffer.alloc(4); size.writeUInt32LE(d.length);
+    return Buffer.concat([Buffer.from(id, 'latin1'), size, d, Buffer.alloc(d.length & 1)]);
+  }));
+  const riff = Buffer.alloc(4); riff.writeUInt32LE(4 + body.length);
+  return Buffer.concat([Buffer.from('RIFF', 'latin1'), riff, Buffer.from('WEBP', 'latin1'), body]);
+}
 
 // Video stubs: the first bytes only.
 const webm = () => Buffer.from([0x1a, 0x45, 0xdf, 0xa3, 0x87, 0x42, 0x82, 0x84, ...Buffer.from('webm')]);
@@ -117,4 +129,4 @@ if (require.main === module && !process.env.NODE_TEST_CONTEXT) {
   console.log(`${Object.keys(expected).length} assets fixture folders -> ${out}`);
 }
 
-module.exports = { makeAssetsFixtures, writeGame, cleanFiles, jpg, png, tEXt, webm, mp4, MEDIA };
+module.exports = { makeAssetsFixtures, writeGame, cleanFiles, jpg, png, tEXt, webp, webm, mp4, MEDIA };
